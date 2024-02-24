@@ -19,6 +19,9 @@ jobs:
       - name: generate files
         run: go generate
 
+      - name: run tests
+        run: go test -v ./...
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
@@ -31,6 +34,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: binaries
-          path: |
-            track
+          path: track
           retention-days: 1
