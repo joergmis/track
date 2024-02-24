@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: Clockodo API v2
+  description: |-
+    Clockodo spec, retraced from their online API documentation. Beware, this might very well include errors or simply be incomplete!
+  version: 0.0.1
+externalDocs:
+  description: Check out the source code
+  url: https://github.com/joergmis/track
+servers:
+  - url: https://my.clockodo.com/api
+tags:
+  - name: customers
+paths:
+  /v2/customers:
+    get:
+      tags:
+        - customers
+      summary: List customers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customers'          
+components:
+  schemas:
+    Pagination:
+      type: object
+      required:
+        - items_per_page
+        - current_page
+        - count_pages
+        - count_items
+      properties:
+        items_per_page:
+          type: integer
+        current_page:
+          type: integer
+        count_pages:
+          type: integer
+        count_items:
+          type: integer
+    Customers:
+      type: object
+      required:
+        - paging
+        - customers
+      properties:
+        paging:
+          $ref: '#/components/schemas/Pagination'
+        customers:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+              - active
+              - billable_default
+              - note
+              - color
+            properties:
+              id: 
+                type: integer
+              name:
+                type: string
+              active:
+                type: boolean
+              billable_default:
+                type: boolean
+              note:
+                type: string
+              color:
+                type: integer
+  securitySchemes:
+    api_key_auth:
+      type: apiKey
+      in: header
+      name: X-ClockodoApiKey
+    api_user_auth:
+      type: apiKey
+      in: header
+      name: X-ClockodoApiUser
+security:
+  - api_user_auth: []
+  - api_key_auth: []
