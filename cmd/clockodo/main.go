@@ -10,14 +10,26 @@ import (
 )
 
 func main() {
+	var (
+		config = clockodo.Config{
+			EmailAddress: viper.GetString("clockodo.email"),
+			ApiToken:     viper.GetString("clockodo.token"),
+		}
+
+		customerRepository track.CustomerRepository
+		projectRepository  track.ProjectRepository
+
+		err error
+	)
+
 	fmt.Printf("running version %s\n", track.Version)
 
-	var customerRepository track.CustomerRepository
+	customerRepository, err = clockodo.NewCustomerRepository(config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	customerRepository, err := clockodo.NewCustomerRepository(clockodo.Config{
-		EmailAddress: viper.GetString("clockodo.email"),
-		ApiToken:     viper.GetString("clockodo.token"),
-	})
+	projectRepository, err = clockodo.NewProjectRepository(config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,10 +38,28 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for _, customer := range customers {
 		log.Println(customer)
 	}
+
+	projects, err := projectRepository.GetAllProjects()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, project := range projects {
+		log.Println(project)
+	}
+
+	customer := track.Customer{Name: "example-customer"}
+
+	projects, err = projectRepository.GetCustomerProjects(customer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, project := range projects {
+		log.Printf("%s project: %s\n", customer.Name, project.Name)
+	}
+
 }
 
 func init() {

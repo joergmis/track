@@ -11,19 +11,32 @@ servers:
   - url: https://my.clockodo.com/api
 tags:
   - name: customers
+  - name: projects
 paths:
   /v2/customers:
     get:
       tags:
         - customers
-      summary: List customers
+      summary: List all customers
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customers'          
+                $ref: '#/components/schemas/Customers'
+  /v2/projects:
+    get:
+      tags:
+        - projects
+      summary: List all projects
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
 components:
   schemas:
     Pagination:
@@ -42,6 +55,65 @@ components:
           type: integer
         count_items:
           type: integer
+    Project:
+      type: object
+      required:
+        - id
+        - customers_id
+        - name
+        - number
+        - active
+        - billable_default
+        - deadline
+      properties:
+        id:
+          type: integer
+        customers_id:
+          type: integer
+        name:
+          type: string
+        number:
+          type: string
+        active:
+          type: boolean
+        billable_default:
+          type: boolean
+        deadline:
+          type: string
+    Projects:
+      type: object
+      required:
+        - paging
+        - projects
+      properties:
+        paging:
+          $ref: '#/components/schemas/Pagination'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+    Customer:
+      type: object
+      required:
+        - id
+        - name
+        - active
+        - billable_default
+        - note
+        - color
+      properties:
+        id: 
+          type: integer
+        name:
+          type: string
+        active:
+          type: boolean
+        billable_default:
+          type: boolean
+        note:
+          type: string
+        color:
+          type: integer
     Customers:
       type: object
       required:
@@ -53,27 +125,7 @@ components:
         customers:
           type: array
           items:
-            type: object
-            required:
-              - id
-              - name
-              - active
-              - billable_default
-              - note
-              - color
-            properties:
-              id: 
-                type: integer
-              name:
-                type: string
-              active:
-                type: boolean
-              billable_default:
-                type: boolean
-              note:
-                type: string
-              color:
-                type: integer
+            $ref: '#/components/schemas/Customer'
   securitySchemes:
     api_key_auth:
       type: apiKey

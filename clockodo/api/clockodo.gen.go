@@ -25,17 +25,20 @@ const (
 	Api_user_authScopes = "api_user_auth.Scopes"
 )
 
+// Customer defines model for Customer.
+type Customer struct {
+	Active          bool   `json:"active"`
+	BillableDefault bool   `json:"billable_default"`
+	Color           int    `json:"color"`
+	Id              int    `json:"id"`
+	Name            string `json:"name"`
+	Note            string `json:"note"`
+}
+
 // Customers defines model for Customers.
 type Customers struct {
-	Customers []struct {
-		Active          bool   `json:"active"`
-		BillableDefault bool   `json:"billable_default"`
-		Color           int    `json:"color"`
-		Id              int    `json:"id"`
-		Name            string `json:"name"`
-		Note            string `json:"note"`
-	} `json:"customers"`
-	Paging Pagination `json:"paging"`
+	Customers []Customer `json:"customers"`
+	Paging    Pagination `json:"paging"`
 }
 
 // Pagination defines model for Pagination.
@@ -44,6 +47,23 @@ type Pagination struct {
 	CountPages   int `json:"count_pages"`
 	CurrentPage  int `json:"current_page"`
 	ItemsPerPage int `json:"items_per_page"`
+}
+
+// Project defines model for Project.
+type Project struct {
+	Active          bool   `json:"active"`
+	BillableDefault bool   `json:"billable_default"`
+	CustomersId     int    `json:"customers_id"`
+	Deadline        string `json:"deadline"`
+	Id              int    `json:"id"`
+	Name            string `json:"name"`
+	Number          string `json:"number"`
+}
+
+// Projects defines model for Projects.
+type Projects struct {
+	Paging   Pagination `json:"paging"`
+	Projects []Project  `json:"projects"`
 }
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
@@ -121,10 +141,25 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 type ClientInterface interface {
 	// GetV2Customers request
 	GetV2Customers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV2Projects request
+	GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetV2Customers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV2CustomersRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2ProjectsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -145,6 +180,33 @@ func NewGetV2CustomersRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/v2/customers")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV2ProjectsRequest generates requests for GetV2Projects
+func NewGetV2ProjectsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/projects")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -207,6 +269,9 @@ func WithBaseURL(baseURL string) ClientOption {
 type ClientWithResponsesInterface interface {
 	// GetV2CustomersWithResponse request
 	GetV2CustomersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2CustomersResponse, error)
+
+	// GetV2ProjectsWithResponse request
+	GetV2ProjectsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ProjectsResponse, error)
 }
 
 type GetV2CustomersResponse struct {
@@ -231,6 +296,28 @@ func (r GetV2CustomersResponse) StatusCode() int {
 	return 0
 }
 
+type GetV2ProjectsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Projects
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2ProjectsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2ProjectsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetV2CustomersWithResponse request returning *GetV2CustomersResponse
 func (c *ClientWithResponses) GetV2CustomersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2CustomersResponse, error) {
 	rsp, err := c.GetV2Customers(ctx, reqEditors...)
@@ -238,6 +325,15 @@ func (c *ClientWithResponses) GetV2CustomersWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetV2CustomersResponse(rsp)
+}
+
+// GetV2ProjectsWithResponse request returning *GetV2ProjectsResponse
+func (c *ClientWithResponses) GetV2ProjectsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ProjectsResponse, error) {
+	rsp, err := c.GetV2Projects(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2ProjectsResponse(rsp)
 }
 
 // ParseGetV2CustomersResponse parses an HTTP response from a GetV2CustomersWithResponse call
@@ -266,11 +362,40 @@ func ParseGetV2CustomersResponse(rsp *http.Response) (*GetV2CustomersResponse, e
 	return response, nil
 }
 
+// ParseGetV2ProjectsResponse parses an HTTP response from a GetV2ProjectsWithResponse call
+func ParseGetV2ProjectsResponse(rsp *http.Response) (*GetV2ProjectsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2ProjectsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Projects
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// List customers
+	// List all customers
 	// (GET /v2/customers)
 	GetV2Customers(ctx echo.Context) error
+	// List all projects
+	// (GET /v2/projects)
+	GetV2Projects(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -288,6 +413,19 @@ func (w *ServerInterfaceWrapper) GetV2Customers(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetV2Customers(ctx)
+	return err
+}
+
+// GetV2Projects converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2Projects(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2Projects(ctx)
 	return err
 }
 
@@ -320,24 +458,26 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/v2/customers", wrapper.GetV2Customers)
+	router.GET(baseURL+"/v2/projects", wrapper.GetV2Projects)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/5RUTW/bOhD8K3x876hnOe5NtzQFiqA9BAhaFDAMg6bWEmN+dbl0Khj67wUpOZY/gqI3",
-	"UbucGc3O6sClM95ZsBR4deBBtmBEfnyIgZwBzAePzgOSgnyS05IiMDd6hCS1h/REnQde8Y1zGoTlfcE3",
-	"Smux0bCuYSuipttd0mmHk5KyBA1gKqn69nsrzJQyECrb5IKjW4W+4Ag/o0KoebVMsCNGcdR/Q+yIdhS4",
-	"Ko6obvMCkhLd+EIgii6dvWgSX3Xg/yFsecX/LU++l6Pp5VPqEqScvVI2AhQT62/xThCuh+aipfXbtK7N",
-	"Gxq8aOC9hogIY8s7c0noaw/4bs+l4+cXLjjONRVnn3D9+X3BA8iIirrn5OiYQ6/WO+jWIlKb42p5xVsQ",
-	"NeBx2BX/8f+DdnLnanfv1Rfo+GmEw7kvMlAMgH+B9C3k0gVUEgq/CNAK/cnJrLKGIFH5YXL8oQW5Yy4S",
-	"oxZYcBElMOnq5EhEnWiJfKjKslHUxs1MOlO+OMDGqFASCrnL07BbdwN81MeCB1kwhNQPNduiM4lPIXNW",
-	"Kwvs/umR1U5GA5ZyqGbsI7wKhIJRqwIzqmmJ7QE79gpaM2WljjUwQHQYmEMWlPG6YxtINWe8BoJ/kiOK",
-	"NEy1JKr9ghd8DxgGnfPZfHaXPsN5sMIrXvEPs7vZnKd1ojbbVu4X5dnPqIH8M0m5z4ofa17xz0DfF6ff",
-	"WUpg8M6GISCL+XxYD0tgaYiM10rm++VLGHZp2NE/bfCJJE/53PjnKCWEsI2avekbUhuNEdjxin9VgZic",
-	"KCXRhLQnk7Xvp0Hn1fJwmczlqi8uc79c9at0C/fZqOXhIkemm8lxFjlMye90Y+Q/HON90tGv+t8BAAD/",
-	"/80XcdU9BgAA",
+	"H4sIAAAAAAAC/7RVTY/jNgz9K6raoxtnpzfftlOgWLSHBRYtCgRBoMiMrYksqRSVrRH4vxeSP+IkznYG",
+	"xdxkk3p8JN+zz1zaxlkDhjwvztzLGhqRjs/Bk20A49mhdYCkIEWEJHWCeKLWAS/43loNwvAu43ultdhr",
+	"2JVwEEHTcpa02uIspAxBBRhDqlx+b0QzL+kJlalSwNJSoMs4wt9BIZS82ETYASMb+S+QHdBGgttsRLX7",
+	"F5AUy41j8fdzkfOQImjS4QeEAy/49/ll0vkw5nyacTdVEoiijc9OVLGR/0D4HLMEKWvuWh4AshmvpYZm",
+	"CPcd2WBoN7Vyv5U+wYkKHiUERBhSHiw8ou8c4MOc21VeX7ipcc0pu2phsX206fgeKh/nvnsk6hJEqZVZ",
+	"FvbbnRCaPeArvXBFbrLGAPFtj0ysvzHPBXu8XdBZRJjQXuWocZ13hnpkjqnCfTNdxj3IgIraLxF+0IVT",
+	"uyO0OxGoTrQML3gNokxz65fD//rxWVt5tKX96NRv0PILnf65yxJQ8IBvQPrDp9ANVCQK/xCgEfoXKxPL",
+	"ErxE5Xpb8+ca5JHZQIxqYN4GlMCkLeOCA+pYlsj5Is8rRXXYr6Rt8hcLWDXK54RCHpMizcEugA/8mHcg",
+	"M4YQ86FkB7RNrKeQWRP1wj5+/sRKK0MDhtKKV+xn+CoQMka18qxRVU3sBNiyr6A1U0bqUAIDRIueWWRe",
+	"NU63bA8xZhungeC7OBFFGuZcYqnTE8/4CdD3PNer9epDbMM6MMIpXvCfVh9W6ygCQXUaW356yq8+4xUk",
+	"c0cdJ8afSl7wX4H+fLr8CKKyvLPG9wJ5Wq/7b6chMNRLxmkl0/38xfcf2l6wr/1B+H7L14P/EqQE7w9B",
+	"s4lfr9rQNAJbXvDflScmtGZyxpZE5aMHZv+FeCv2Pvfb49Ynj79j51ON/9m4u3Ad+75Yvpt7nBeb860p",
+	"N9suu7X8Zttt4y08JY1szjcWatqVHGSYfBSlFm8M5c+jsy/jjzWGlxO3btv9GwAA//8CUdPpnQkAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

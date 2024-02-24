@@ -1,6 +1,9 @@
 # track
 
-Timetracking application.
+Generic timetracking application which provides the possibility to sync/save
+activities to different backends.
+
+## Clockodo
 
 To test the clockodo acces:
 
@@ -10,4 +13,5 @@ To test the clockodo acces:
 Loosely inspired by:
 
 - [gotimetrack](https://github.com/danielbatw/gotimetrack)
+- [timewarrior](https://github.com/GothenburgBitFactory/timewarrior)
 - [goddd](https://github.com/marcusolsson/goddd)
