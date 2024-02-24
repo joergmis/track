@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/joergmis/track"
@@ -9,6 +10,8 @@ import (
 )
 
 func main() {
+	fmt.Printf("running version %s\n", track.Version)
+
 	var customerRepository track.CustomerRepository
 
 	customerRepository, err := clockodo.NewCustomerRepository(clockodo.Config{
