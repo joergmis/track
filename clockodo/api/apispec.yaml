@@ -65,6 +65,7 @@ components:
         - active
         - billable_default
         - deadline
+        - completed
       properties:
         id:
           type: integer
@@ -80,6 +81,8 @@ components:
           type: boolean
         deadline:
           type: string
+        completed:
+          type: boolean
     Projects:
       type: object
       required:

@@ -35,7 +35,9 @@ func (r *repository) GetAllProjects() ([]track.Project, error) {
 
 	for _, p := range r.projects {
 		data = append(data, track.Project{
-			Name: p.Name,
+			Name:      p.Name,
+			Active:    p.Active,
+			Completed: p.Completed,
 		})
 	}
 

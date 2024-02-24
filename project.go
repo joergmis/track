@@ -1,6 +1,8 @@
 package track
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+)
 
 var (
 	ErrCustomerNotFound = errors.New("customer not found")
@@ -16,7 +18,9 @@ type CustomerRepository interface {
 }
 
 type Project struct {
-	Name string
+	Name      string
+	Active    bool
+	Completed bool
 }
 
 type ProjectRepository interface {

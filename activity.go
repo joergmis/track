@@ -1,6 +1,6 @@
 package track
 
 type Activity struct {
-	Customer string
-	Project  string
+	Customer Customer
+	Project  Project
 }
