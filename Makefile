@@ -10,7 +10,7 @@ generate: ## generate: generate mocks, version and api client code based on the 
 	@echo "+ $@"
 	@go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@latest
 	@go install github.com/vektra/mockery/v2@v2.42.0
-	@oapi-codegen -package clockodo ./clockodo/apispec.yaml > ./clockodo/clockodo.gen.go
+	@oapi-codegen -package api ./clockodo/api/apispec.yaml > ./clockodo/api/clockodo.gen.go
 	@go generate
 	@mockery
 

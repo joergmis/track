@@ -8,6 +8,7 @@ import (
 
 	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/joergmis/track"
+	"github.com/joergmis/track/clockodo/api"
 )
 
 type Config struct {
@@ -16,7 +17,7 @@ type Config struct {
 }
 
 type customerRepository struct {
-	client *ClientWithResponses
+	client *api.ClientWithResponses
 }
 
 func NewCustomerRepository(config Config) (track.CustomerRepository, error) {
@@ -53,11 +54,11 @@ func NewCustomerRepository(config Config) (track.CustomerRepository, error) {
 	}
 
 	// see https://www.clockodo.com/en/api/#c15088-headline for reference
-	client, err := NewClientWithResponses(
+	client, err := api.NewClientWithResponses(
 		"https://my.clockodo.com/api",
-		WithRequestEditorFn(usernameProvider.Intercept),
-		WithRequestEditorFn(apiKeyProvider.Intercept),
-		WithRequestEditorFn(clientIdentificationProvider),
+		api.WithRequestEditorFn(usernameProvider.Intercept),
+		api.WithRequestEditorFn(apiKeyProvider.Intercept),
+		api.WithRequestEditorFn(clientIdentificationProvider),
 	)
 	if err != nil {
 		return repo, err
