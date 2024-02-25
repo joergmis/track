@@ -13,17 +13,14 @@ type Customer struct {
 	Name string
 }
 
-type CustomerRepository interface {
-	GetAllCustomers() ([]Customer, error)
-}
-
 type Project struct {
 	Name      string
 	Active    bool
 	Completed bool
 }
 
-type ProjectRepository interface {
+type Repository interface {
+	GetAllCustomers() ([]Customer, error)
 	GetAllProjects() ([]Project, error)
-	GetCustomerProjects(customer Customer) ([]Project, error)
+	GetCustomerProjects(customer string) ([]Project, error)
 }

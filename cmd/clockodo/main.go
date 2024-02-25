@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/joergmis/track"
-	"github.com/joergmis/track/clockodo"
+	"github.com/joergmis/track/local"
 	"github.com/spf13/viper"
 )
 
@@ -19,32 +18,18 @@ const (
 )
 
 type customer struct {
-	name string
+	name        string
+	description string
 }
 
 func (c customer) FilterValue() string {
-	return c.name
+	return c.name + " " + c.description
 }
 func (c customer) Title() string {
 	return c.name
 }
 func (c customer) Description() string {
-	return ""
-}
-
-type project struct {
-	name        string
-	description string
-}
-
-func (p project) FilterValue() string {
-	return p.name
-}
-func (p project) Title() string {
-	return p.name
-}
-func (p project) Description() string {
-	return p.description
+	return c.description
 }
 
 type model struct {
@@ -54,8 +39,7 @@ type model struct {
 	projectView    list.Model
 	activitiesView list.Model
 
-	customerRepository track.CustomerRepository
-	projectRepository  track.ProjectRepository
+	repository track.Repository
 
 	loading bool
 	quiting bool
@@ -69,33 +53,6 @@ func (m *model) deselectCustomer() {
 	items := []list.Item{}
 	m.projectView.SetItems(items)
 	m.focused = customerViewFocused
-}
-
-func (m *model) selectCustomer() {
-	customer, ok := m.customerView.SelectedItem().(customer)
-	if !ok {
-		tea.Quit()
-		log.Fatal("failed to cast to customer")
-	}
-
-	projects, err := m.projectRepository.GetCustomerProjects(track.Customer{Name: customer.Title()})
-	if err != nil {
-		tea.Quit()
-		log.Fatal(err)
-	}
-
-	items := []list.Item{}
-
-	for _, p := range projects {
-		items = append(items, project{
-			name:        p.Name,
-			description: fmt.Sprintf("completed: %v, active: %v", p.Completed, p.Active),
-		})
-	}
-
-	m.projectView.SetItems(items)
-	m.projectView.ResetFilter()
-	m.focused = projectViewFocused
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -114,27 +71,29 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			m.quiting = true
 			return m, tea.Quit
-
-		case "enter":
-			m.selectCustomer()
-
-		case "left", "h":
-			m.deselectCustomer()
 		}
 	}
 
 	var cmd tea.Cmd
+	cmds := []tea.Cmd{}
 
 	switch m.focused {
 	case customerViewFocused:
+		m.projectView, cmd = m.projectView.Update(msg)
+		cmds = append(cmds, cmd)
 		m.customerView, cmd = m.customerView.Update(msg)
+		cmds = append(cmds, cmd)
+
 	case projectViewFocused:
 		m.projectView, cmd = m.projectView.Update(msg)
+		cmds = append(cmds, cmd)
+
 	case activitiesViewFocused:
 		m.activitiesView, cmd = m.activitiesView.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
-	return m, cmd
+	return m, tea.Batch(cmds...)
 }
 
 func (m *model) View() string {
@@ -155,7 +114,6 @@ func (m *model) View() string {
 			m.customerView.View(),
 			m.projectView.View(),
 		)
-
 	case activitiesViewFocused:
 		fallthrough
 	default:
@@ -164,17 +122,14 @@ func (m *model) View() string {
 }
 
 func newModel() *model {
-	config := clockodo.Config{
-		EmailAddress: viper.GetString("clockodo.email"),
-		ApiToken:     viper.GetString("clockodo.token"),
-	}
+	// config := clockodo.Config{
+	// 	EmailAddress: viper.GetString("clockodo.email"),
+	// 	ApiToken:     viper.GetString("clockodo.token"),
+	// }
 
-	customerRepository, err := clockodo.NewCustomerRepository(config)
-	if err != nil {
-		log.Fatal(err)
-	}
+	repo := local.NewRepository()
 
-	customers, err := customerRepository.GetAllCustomers()
+	customers, err := repo.GetAllCustomers()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -182,39 +137,38 @@ func newModel() *model {
 	items := []list.Item{}
 
 	for _, c := range customers {
-		items = append(items, customer{
-			name: c.Name,
-		})
+		projects, err := repo.GetCustomerProjects(c.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, p := range projects {
+			items = append(items, customer{
+				name:        c.Name,
+				description: p.Name,
+			})
+		}
 	}
 
+	m := &model{}
+
 	customerList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	customerList.Title = "Select project"
+	customerList.Title = "Select customer"
 	customerList.SetItems(items)
 	customerList.SetShowHelp(false)
 
-	projecRepository, err := clockodo.NewProjectRepository(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = projecRepository.GetAllProjects()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	projectList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	projectList.Title = "Select customer"
+	projectList.Title = "Select project"
 	projectList.SetItems([]list.Item{})
 	projectList.SetShowHelp(false)
 
-	return &model{
-		focused:            customerViewFocused,
-		customerView:       customerList,
-		projectView:        projectList,
-		customerRepository: customerRepository,
-		projectRepository:  projecRepository,
-		loading:            true,
-	}
+	m.focused = customerViewFocused
+	m.customerView = customerList
+	m.projectView = projectList
+	m.repository = repo
+	m.loading = true
+
+	return m
 }
 
 func main() {
