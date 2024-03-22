@@ -1,0 +1,8 @@
+[
+    {
+        "id": "test",
+        "name": "run tests",
+        "command": "go test ./...",
+        "console": "integratedTerminal"
+    }
+]

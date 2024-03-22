@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/joergmis/track/clockodo"
+	"github.com/joergmis/track/ui"
 	"github.com/spf13/viper"
 )
 
@@ -18,14 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	customers, err := repo.GetAllCustomers()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, customer := range customers {
-		fmt.Println(customer)
-	}
+	ui.New(repo).Run()
 }
 
 func init() {
