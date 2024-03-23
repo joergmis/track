@@ -13,7 +13,8 @@ generate: ## generate: generate mocks, version and api client code based on the 
 	@oapi-codegen -package api ./clockodo/api/apispec.yaml > ./clockodo/api/clockodo.gen.go
 	@go generate
 	@mockery
+	@go run cmd/cli/main.go generate
 
 build: generate
 	@echo "+ $@"
-	@go build -o track cmd/clockodo/main.go
+	@go build -o track cmd/cli/main.go

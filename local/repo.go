@@ -2,8 +2,7 @@ package local
 
 import "github.com/joergmis/track"
 
-type repo struct {
-}
+type repo struct{}
 
 func NewRepository() track.Repository {
 	return &repo{}

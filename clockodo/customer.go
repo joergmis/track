@@ -2,18 +2,16 @@ package clockodo
 
 import (
 	"context"
+	"strings"
 
 	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo/api"
-	"github.com/pkg/errors"
 )
 
 var repo *repository
 
 type repository struct {
-	client    *api.ClientWithResponses
-	customers []api.Customer
-	projects  []api.Project
+	client *api.ClientWithResponses
 }
 
 func NewRepository(config Config) (track.Repository, error) {
@@ -34,73 +32,59 @@ func NewRepository(config Config) (track.Repository, error) {
 func (r *repository) GetAllCustomers() ([]track.Customer, error) {
 	ctx := context.Background()
 	data := []track.Customer{}
+	var projects []api.Project
 
-	response, err := r.client.GetV2CustomersWithResponse(ctx)
-	if err != nil {
-		return data, err
-	}
-
-	r.customers = response.JSON200.Customers
-
-	for _, c := range r.customers {
-		data = append(data, track.Customer{
-			Name: c.Name,
-		})
-	}
-
-	return data, nil
-}
-
-func (r *repository) GetAllProjects() ([]track.Project, error) {
-	ctx := context.Background()
-	data := []track.Project{}
-
-	response, err := r.client.GetV2ProjectsWithResponse(ctx)
-	if err != nil {
-		return data, err
-	}
-
-	r.projects = response.JSON200.Projects
-
-	for _, p := range r.projects {
-		data = append(data, track.Project{
-			Name:      p.Name,
-			Active:    p.Active,
-			Completed: p.Completed,
-		})
-	}
-
-	return data, nil
-}
-
-func (r *repository) GetCustomerProjects(customer string) ([]track.Project, error) {
-	data := []track.Project{}
-	id := -1
-
-	// TODO: this assumes that the customers and or projects have already been
-	// loaded. The question is if this should be handled as error or if we
-	// should just load them here
-	if len(r.customers) == 0 || len(r.projects) == 0 {
-		return data, errors.Wrap(track.ErrNotInitialized, "no projects and/or customers found")
-	}
-
-	for _, c := range r.customers {
-		if customer == c.Name {
-			id = c.Id
+	{
+		response, err := r.client.GetV2ProjectsWithResponse(ctx)
+		if err != nil {
+			return data, err
 		}
+
+		projects = response.JSON200.Projects
 	}
 
-	if id == -1 {
-		return data, errors.Wrapf(track.ErrCustomerNotFound, "customer id %d", id)
-	}
+	{
+		response, err := r.client.GetV2CustomersWithResponse(ctx)
+		if err != nil {
+			return data, err
+		}
 
-	for _, p := range r.projects {
-		if p.CustomersId == id {
-			data = append(data, track.Project{
-				Name: p.Name,
+		customers := response.JSON200.Customers
+
+		for _, c := range customers {
+			customerProjects := []track.Project{}
+
+			for _, p := range projects {
+				if p.CustomersId == c.Id {
+					customerProjects = append(customerProjects, track.Project{
+						ID:        cleanup(p.Name),
+						Name:      p.Name,
+						Active:    p.Active,
+						Completed: p.Completed,
+						Services:  []track.Service{},
+					})
+				}
+			}
+
+			data = append(data, track.Customer{
+				ID:       cleanup(c.Name),
+				Name:     c.Name,
+				Projects: customerProjects,
 			})
 		}
 	}
 
 	return data, nil
+}
+
+func cleanup(in string) string {
+	replacer := strings.NewReplacer(
+		" ", "_",
+		"ä", "ae",
+		"ö", "oe",
+		"ü", "ue",
+		"\"", "'",
+	)
+
+	return replacer.Replace(strings.ToLower(in))
 }
