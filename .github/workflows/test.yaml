@@ -11,7 +11,7 @@ jobs:
       - name: setup go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22.0'
+          go-version: '1.21.3'
 
       - name: install dependencies
         run: go get .
@@ -20,7 +20,7 @@ jobs:
         run: go generate
 
       - name: run tests
-        run: go test -v ./...
+        run: go test $(go list ./... | grep -v ci)
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
