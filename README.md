@@ -3,7 +3,8 @@
 Timetracking application.
 
 * copy `track.example.yaml` to `track.yaml` and adjust the values
-* test the access by running `go run cmd/clockodo/main.go`
+* install app by running `make install`
+* setup completion; `track completion bash > /tmp/completion && source /tmp/completion`
 
 Loosely inspired by:
 
