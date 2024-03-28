@@ -29,7 +29,7 @@ application.`,
 			Customers: customers,
 		}))
 
-		cobra.CheckErr(os.WriteFile("./cmd/cli/cmd/data.go", buf.Bytes(), 0644))
+		cobra.CheckErr(os.WriteFile("./cmd/track/cmd/data.go", buf.Bytes(), 0644))
 	},
 }
 

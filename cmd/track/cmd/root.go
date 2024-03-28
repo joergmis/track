@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	repo         track.Repository
+	repo         track.ProjectRepository
 	customerData []track.Customer
 
 	rootCmd = &cobra.Command{

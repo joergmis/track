@@ -14,7 +14,7 @@ type repository struct {
 	client *api.ClientWithResponses
 }
 
-func NewRepository(config Config) (track.Repository, error) {
+func NewRepository(config Config) (track.ProjectRepository, error) {
 	if repo == nil {
 		repo = &repository{}
 

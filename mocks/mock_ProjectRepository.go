@@ -20,24 +20,24 @@ func (_m *MockProjectRepository) EXPECT() *MockProjectRepository_Expecter {
 	return &MockProjectRepository_Expecter{mock: &_m.Mock}
 }
 
-// GetAllProjects provides a mock function with given fields:
-func (_m *MockProjectRepository) GetAllProjects() ([]track.Project, error) {
+// GetAllCustomers provides a mock function with given fields:
+func (_m *MockProjectRepository) GetAllCustomers() ([]track.Customer, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetAllProjects")
+		panic("no return value specified for GetAllCustomers")
 	}
 
-	var r0 []track.Project
+	var r0 []track.Customer
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]track.Project, error)); ok {
+	if rf, ok := ret.Get(0).(func() ([]track.Customer, error)); ok {
 		return rf()
 	}
-	if rf, ok := ret.Get(0).(func() []track.Project); ok {
+	if rf, ok := ret.Get(0).(func() []track.Customer); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]track.Project)
+			r0 = ret.Get(0).([]track.Customer)
 		}
 	}
 
@@ -50,87 +50,29 @@ func (_m *MockProjectRepository) GetAllProjects() ([]track.Project, error) {
 	return r0, r1
 }
 
-// MockProjectRepository_GetAllProjects_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllProjects'
-type MockProjectRepository_GetAllProjects_Call struct {
+// MockProjectRepository_GetAllCustomers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllCustomers'
+type MockProjectRepository_GetAllCustomers_Call struct {
 	*mock.Call
 }
 
-// GetAllProjects is a helper method to define mock.On call
-func (_e *MockProjectRepository_Expecter) GetAllProjects() *MockProjectRepository_GetAllProjects_Call {
-	return &MockProjectRepository_GetAllProjects_Call{Call: _e.mock.On("GetAllProjects")}
+// GetAllCustomers is a helper method to define mock.On call
+func (_e *MockProjectRepository_Expecter) GetAllCustomers() *MockProjectRepository_GetAllCustomers_Call {
+	return &MockProjectRepository_GetAllCustomers_Call{Call: _e.mock.On("GetAllCustomers")}
 }
 
-func (_c *MockProjectRepository_GetAllProjects_Call) Run(run func()) *MockProjectRepository_GetAllProjects_Call {
+func (_c *MockProjectRepository_GetAllCustomers_Call) Run(run func()) *MockProjectRepository_GetAllCustomers_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *MockProjectRepository_GetAllProjects_Call) Return(_a0 []track.Project, _a1 error) *MockProjectRepository_GetAllProjects_Call {
+func (_c *MockProjectRepository_GetAllCustomers_Call) Return(_a0 []track.Customer, _a1 error) *MockProjectRepository_GetAllCustomers_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockProjectRepository_GetAllProjects_Call) RunAndReturn(run func() ([]track.Project, error)) *MockProjectRepository_GetAllProjects_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetCustomerProjects provides a mock function with given fields: customer
-func (_m *MockProjectRepository) GetCustomerProjects(customer track.Customer) ([]track.Project, error) {
-	ret := _m.Called(customer)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetCustomerProjects")
-	}
-
-	var r0 []track.Project
-	var r1 error
-	if rf, ok := ret.Get(0).(func(track.Customer) ([]track.Project, error)); ok {
-		return rf(customer)
-	}
-	if rf, ok := ret.Get(0).(func(track.Customer) []track.Project); ok {
-		r0 = rf(customer)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]track.Project)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(track.Customer) error); ok {
-		r1 = rf(customer)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockProjectRepository_GetCustomerProjects_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCustomerProjects'
-type MockProjectRepository_GetCustomerProjects_Call struct {
-	*mock.Call
-}
-
-// GetCustomerProjects is a helper method to define mock.On call
-//   - customer track.Customer
-func (_e *MockProjectRepository_Expecter) GetCustomerProjects(customer interface{}) *MockProjectRepository_GetCustomerProjects_Call {
-	return &MockProjectRepository_GetCustomerProjects_Call{Call: _e.mock.On("GetCustomerProjects", customer)}
-}
-
-func (_c *MockProjectRepository_GetCustomerProjects_Call) Run(run func(customer track.Customer)) *MockProjectRepository_GetCustomerProjects_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(track.Customer))
-	})
-	return _c
-}
-
-func (_c *MockProjectRepository_GetCustomerProjects_Call) Return(_a0 []track.Project, _a1 error) *MockProjectRepository_GetCustomerProjects_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockProjectRepository_GetCustomerProjects_Call) RunAndReturn(run func(track.Customer) ([]track.Project, error)) *MockProjectRepository_GetCustomerProjects_Call {
+func (_c *MockProjectRepository_GetAllCustomers_Call) RunAndReturn(run func() ([]track.Customer, error)) *MockProjectRepository_GetAllCustomers_Call {
 	_c.Call.Return(run)
 	return _c
 }
