@@ -25,6 +25,11 @@ jobs:
       - name: run tests
         run: go test $(go list ./... | grep -v ci)
 
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+
       - name: build binaries
         run: make build
 
