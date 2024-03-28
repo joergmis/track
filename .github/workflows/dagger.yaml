@@ -8,6 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
       - name: test dagger call
         uses: dagger/dagger-for-github@v5
         with:
