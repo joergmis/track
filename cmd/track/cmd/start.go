@@ -6,12 +6,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var addCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Add a time entry",
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Start (and stop a previous) time entry",
 	Long: `Use the format:
 
-    ./track add <client> <project> <service> <description>
+./track start <client> <project> <service> <description>
 
 'generate' and 'completion' can be used to generate the 
 autocompletion for your prefered shell.`,
@@ -46,5 +46,5 @@ autocompletion for your prefered shell.`,
 }
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(startCmd)
 }

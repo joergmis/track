@@ -23,19 +23,9 @@ jobs:
         run: go generate
 
       - name: run tests
-        run: go test $(go list ./... | grep -v ci)
+        run: go test ./...
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-
-      - name: build binaries
-        run: make build
-
-      - name: upload binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: binaries
-          path: track
-          retention-days: 1
