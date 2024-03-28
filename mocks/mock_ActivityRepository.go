@@ -20,23 +20,71 @@ func (_m *MockActivityRepository) EXPECT() *MockActivityRepository_Expecter {
 	return &MockActivityRepository_Expecter{mock: &_m.Mock}
 }
 
-// GetCurrentActivity provides a mock function with given fields:
-func (_m *MockActivityRepository) GetCurrentActivity() (track.Activity, error) {
+// Add provides a mock function with given fields: activity
+func (_m *MockActivityRepository) Add(activity track.Activity) error {
+	ret := _m.Called(activity)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Add")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
+		r0 = rf(activity)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockActivityRepository_Add_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Add'
+type MockActivityRepository_Add_Call struct {
+	*mock.Call
+}
+
+// Add is a helper method to define mock.On call
+//   - activity track.Activity
+func (_e *MockActivityRepository_Expecter) Add(activity interface{}) *MockActivityRepository_Add_Call {
+	return &MockActivityRepository_Add_Call{Call: _e.mock.On("Add", activity)}
+}
+
+func (_c *MockActivityRepository_Add_Call) Run(run func(activity track.Activity)) *MockActivityRepository_Add_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(track.Activity))
+	})
+	return _c
+}
+
+func (_c *MockActivityRepository_Add_Call) Return(_a0 error) *MockActivityRepository_Add_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockActivityRepository_Add_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_Add_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetAllActivities provides a mock function with given fields:
+func (_m *MockActivityRepository) GetAllActivities() ([]track.Activity, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetCurrentActivity")
+		panic("no return value specified for GetAllActivities")
 	}
 
-	var r0 track.Activity
+	var r0 []track.Activity
 	var r1 error
-	if rf, ok := ret.Get(0).(func() (track.Activity, error)); ok {
+	if rf, ok := ret.Get(0).(func() ([]track.Activity, error)); ok {
 		return rf()
 	}
-	if rf, ok := ret.Get(0).(func() track.Activity); ok {
+	if rf, ok := ret.Get(0).(func() []track.Activity); ok {
 		r0 = rf()
 	} else {
-		r0 = ret.Get(0).(track.Activity)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]track.Activity)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func() error); ok {
@@ -48,120 +96,29 @@ func (_m *MockActivityRepository) GetCurrentActivity() (track.Activity, error) {
 	return r0, r1
 }
 
-// MockActivityRepository_GetCurrentActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCurrentActivity'
-type MockActivityRepository_GetCurrentActivity_Call struct {
+// MockActivityRepository_GetAllActivities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllActivities'
+type MockActivityRepository_GetAllActivities_Call struct {
 	*mock.Call
 }
 
-// GetCurrentActivity is a helper method to define mock.On call
-func (_e *MockActivityRepository_Expecter) GetCurrentActivity() *MockActivityRepository_GetCurrentActivity_Call {
-	return &MockActivityRepository_GetCurrentActivity_Call{Call: _e.mock.On("GetCurrentActivity")}
+// GetAllActivities is a helper method to define mock.On call
+func (_e *MockActivityRepository_Expecter) GetAllActivities() *MockActivityRepository_GetAllActivities_Call {
+	return &MockActivityRepository_GetAllActivities_Call{Call: _e.mock.On("GetAllActivities")}
 }
 
-func (_c *MockActivityRepository_GetCurrentActivity_Call) Run(run func()) *MockActivityRepository_GetCurrentActivity_Call {
+func (_c *MockActivityRepository_GetAllActivities_Call) Run(run func()) *MockActivityRepository_GetAllActivities_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *MockActivityRepository_GetCurrentActivity_Call) Return(_a0 track.Activity, _a1 error) *MockActivityRepository_GetCurrentActivity_Call {
+func (_c *MockActivityRepository_GetAllActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetAllActivities_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockActivityRepository_GetCurrentActivity_Call) RunAndReturn(run func() (track.Activity, error)) *MockActivityRepository_GetCurrentActivity_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// Start provides a mock function with given fields: _a0
-func (_m *MockActivityRepository) Start(_a0 track.Activity) error {
-	ret := _m.Called(_a0)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Start")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockActivityRepository_Start_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Start'
-type MockActivityRepository_Start_Call struct {
-	*mock.Call
-}
-
-// Start is a helper method to define mock.On call
-//   - _a0 track.Activity
-func (_e *MockActivityRepository_Expecter) Start(_a0 interface{}) *MockActivityRepository_Start_Call {
-	return &MockActivityRepository_Start_Call{Call: _e.mock.On("Start", _a0)}
-}
-
-func (_c *MockActivityRepository_Start_Call) Run(run func(_a0 track.Activity)) *MockActivityRepository_Start_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(track.Activity))
-	})
-	return _c
-}
-
-func (_c *MockActivityRepository_Start_Call) Return(_a0 error) *MockActivityRepository_Start_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockActivityRepository_Start_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_Start_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// Stop provides a mock function with given fields:
-func (_m *MockActivityRepository) Stop() error {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for Stop")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockActivityRepository_Stop_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Stop'
-type MockActivityRepository_Stop_Call struct {
-	*mock.Call
-}
-
-// Stop is a helper method to define mock.On call
-func (_e *MockActivityRepository_Expecter) Stop() *MockActivityRepository_Stop_Call {
-	return &MockActivityRepository_Stop_Call{Call: _e.mock.On("Stop")}
-}
-
-func (_c *MockActivityRepository_Stop_Call) Run(run func()) *MockActivityRepository_Stop_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockActivityRepository_Stop_Call) Return(_a0 error) *MockActivityRepository_Stop_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockActivityRepository_Stop_Call) RunAndReturn(run func() error) *MockActivityRepository_Stop_Call {
+func (_c *MockActivityRepository_GetAllActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetAllActivities_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -171,7 +128,8 @@ func (_c *MockActivityRepository_Stop_Call) RunAndReturn(run func() error) *Mock
 func NewMockActivityRepository(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *MockActivityRepository {
+},
+) *MockActivityRepository {
 	mock := &MockActivityRepository{}
 	mock.Mock.Test(t)
 

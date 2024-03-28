@@ -9,6 +9,8 @@ import (
 var (
 	ErrNoCurrentActivity = errors.New("no active activity")
 	ErrCustomerNotFound  = errors.New("customer not found")
+	ErrProjectNotFound   = errors.New("project not found")
+	ErrServiceNotFound   = errors.New("service not found")
 	ErrNotInitialized    = errors.New("repository has not been initialized")
 )
 
@@ -19,11 +21,9 @@ type Customer struct {
 }
 
 type Project struct {
-	ID        string
-	Name      string
-	Active    bool
-	Completed bool
-	Services  []Service
+	ID       string
+	Name     string
+	Services []Service
 }
 
 type Service struct {
@@ -42,17 +42,10 @@ type Activity struct {
 }
 
 type ActivityRepository interface {
-	// Start starts a new activity, stopping any previous activities if there
-	// is still one running.
-	Start(Activity) error
-	// GetCurrentActivity returns the currently running activity or an error if
-	// there is none running.
-	GetCurrentActivity() (Activity, error)
-	// Stop stops the currently active activity.
-	Stop() error
+	GetAllActivities() ([]Activity, error)
+	Add(activity Activity) error
 }
+
 type ProjectRepository interface {
-	// GetAllCustomers returns all customers, including their projects and
-	// services.
 	GetAllCustomers() ([]Customer, error)
 }

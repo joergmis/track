@@ -29,7 +29,7 @@
     {
         "id": "test",
         "name": "run the tests",
-        "command": "go test ./...",
+        "command": "go test -v ./...",
         "console": "integratedTerminal"
     }
 ]

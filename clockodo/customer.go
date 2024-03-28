@@ -57,11 +57,9 @@ func (r *repository) GetAllCustomers() ([]track.Customer, error) {
 			for _, p := range projects {
 				if p.CustomersId == c.Id {
 					customerProjects = append(customerProjects, track.Project{
-						ID:        cleanup(p.Name),
-						Name:      p.Name,
-						Active:    p.Active,
-						Completed: p.Completed,
-						Services:  []track.Service{},
+						ID:       cleanup(p.Name),
+						Name:     p.Name,
+						Services: []track.Service{},
 					})
 				}
 			}
