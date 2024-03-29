@@ -30,7 +30,7 @@ func givenTheDateIs(ctx context.Context, date string) (context.Context, error) {
 }
 
 func givenTheCustomerExists(ctx context.Context, customer, project, service string) (context.Context, error) {
-	customers := append(customers, track.Customer{
+	customers = append(customers, track.Customer{
 		ID:   customer,
 		Name: customer,
 		Projects: []track.Project{
@@ -49,6 +49,23 @@ func givenTheCustomerExists(ctx context.Context, customer, project, service stri
 
 	timeTracking.ProjectRepository.(*mocks.MockProjectRepository).EXPECT().GetAllCustomers().Maybe().Return(customers, nil)
 
+	return ctx, nil
+}
+
+func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, service, description, date string) (context.Context, error) {
+	_, err := time.Parse(time.DateTime, date)
+	if err != nil {
+		return ctx, errors.Wrap(err, "parse start date string")
+	}
+
+	timeTracking.ActivityRepository.(*mocks.MockActivityRepository).EXPECT().GetAllActivities().Maybe().Return([]track.Activity{
+		{
+			CustomerID:  customer,
+			ProjectID:   project,
+			ServiceID:   service,
+			Description: description,
+		},
+	}, nil)
 	return ctx, nil
 }
 
@@ -93,12 +110,13 @@ func setup() {
 func initializeScenario(ctx *godog.ScenarioContext) {
 	setup()
 
-	ctx.Given(`^the date is ([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})$`, givenTheDateIs)
-	ctx.Given(`^the customer (\w) with project (\w) and service (\w) exists$`, givenTheCustomerExists)
+	ctx.Given(`^the date is "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})"$`, givenTheDateIs)
+	ctx.Given(`^the customer "(\w+)" with project "(\w+)" and service "(\w+)" exists$`, givenTheCustomerExists)
+	ctx.Given(`^there is an activity running for "(\w+)" "(\w+)" "(\w+)" "(\w+)" started on "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})"$`, givenThereIsAnAcitivityRunningFor)
 
-	ctx.When(`^starting a new activity for (\w) (\w) (\w) (\w)`, whenStartingANewActivityFor)
+	ctx.When(`^starting a new activity for "(\w+)" "(\w+)" "(\w+)" "(\w+)"$`, whenStartingANewActivityFor)
 
-	ctx.Then(`^a time entry is added for ([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) (\w) (\w) (\w) (\w)`, thenATimeentryIsAddedFor)
+	ctx.Then(`^a time entry is added for "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})" "(\w+)" "(\w+)" "(\w+)" "(\w+)"$`, thenATimeentryIsAddedFor)
 }
 
 func TestFeatures(t *testing.T) {
