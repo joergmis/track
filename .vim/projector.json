@@ -2,7 +2,7 @@
     {
         "id": "generate.mocks",
         "name": "generate mocks",
-        "command": "mockery",
+        "command": "rm -rf ./mocks/* && mockery",
         "console": "integratedTerminal"
     },
     {
@@ -23,6 +23,16 @@
         "command": "go build -o track cmd/track/main.go",
         "dependencies": [
             "generate.version"
+        ],
+        "console": "integratedTerminal"
+    },
+    {
+        "id": "install",
+        "name": "install the binary",
+        "command": "go install ./cmd/track",
+        "dependencies": [
+            "generate.version",
+            "build"
         ],
         "console": "integratedTerminal"
     },
