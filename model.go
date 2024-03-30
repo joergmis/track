@@ -34,7 +34,6 @@ type Activity struct {
 	ID          string
 	CustomerID  string
 	ProjectID   string
-	ServiceID   string
 	Description string
 	Start       time.Time
 	End         time.Time
@@ -47,4 +46,5 @@ type ActivityRepository interface {
 
 type ProjectRepository interface {
 	GetAllCustomers() ([]Customer, error)
+	GetTimeEntries(start, end time.Time) ([]Activity, error)
 }

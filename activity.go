@@ -24,7 +24,7 @@ func NewTimeTracking(clock Clock, projectRepository ProjectRepository, activityR
 	}
 }
 
-func (t *TimeTracking) Start(customerID, projectID, serviceID, description string) error {
+func (t *TimeTracking) Start(customerID, projectID, description string) error {
 	var customer Customer
 
 	customers, err := t.ProjectRepository.GetAllCustomers()
@@ -62,7 +62,6 @@ func (t *TimeTracking) Start(customerID, projectID, serviceID, description strin
 	if err := t.ActivityRepository.Add(Activity{
 		CustomerID:  customerID,
 		ProjectID:   projectID,
-		ServiceID:   serviceID,
 		Description: description,
 		Start:       t.Clock.Now(),
 	}); err != nil {
