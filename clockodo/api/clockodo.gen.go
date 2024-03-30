@@ -67,6 +67,21 @@ type Projects struct {
 	Projects []Project  `json:"projects"`
 }
 
+// Service defines model for Service.
+type Service struct {
+	Active bool   `json:"active"`
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Note   string `json:"note"`
+	Number int    `json:"number"`
+}
+
+// Services defines model for Services.
+type Services struct {
+	Paging   Pagination `json:"paging"`
+	Services *[]Service `json:"services,omitempty"`
+}
+
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
 
@@ -145,6 +160,9 @@ type ClientInterface interface {
 
 	// GetV2Projects request
 	GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV2Services request
+	GetV2Services(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetV2Customers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -161,6 +179,18 @@ func (c *Client) GetV2Customers(ctx context.Context, reqEditors ...RequestEditor
 
 func (c *Client) GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV2ProjectsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV2Services(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2ServicesRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -208,6 +238,33 @@ func NewGetV2ProjectsRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/v2/projects")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV2ServicesRequest generates requests for GetV2Services
+func NewGetV2ServicesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/services")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -273,6 +330,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetV2ProjectsWithResponse request
 	GetV2ProjectsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ProjectsResponse, error)
+
+	// GetV2ServicesWithResponse request
+	GetV2ServicesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ServicesResponse, error)
 }
 
 type GetV2CustomersResponse struct {
@@ -319,6 +379,28 @@ func (r GetV2ProjectsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV2ServicesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Services
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2ServicesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2ServicesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetV2CustomersWithResponse request returning *GetV2CustomersResponse
 func (c *ClientWithResponses) GetV2CustomersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2CustomersResponse, error) {
 	rsp, err := c.GetV2Customers(ctx, reqEditors...)
@@ -335,6 +417,15 @@ func (c *ClientWithResponses) GetV2ProjectsWithResponse(ctx context.Context, req
 		return nil, err
 	}
 	return ParseGetV2ProjectsResponse(rsp)
+}
+
+// GetV2ServicesWithResponse request returning *GetV2ServicesResponse
+func (c *ClientWithResponses) GetV2ServicesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ServicesResponse, error) {
+	rsp, err := c.GetV2Services(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2ServicesResponse(rsp)
 }
 
 // ParseGetV2CustomersResponse parses an HTTP response from a GetV2CustomersWithResponse call
@@ -389,6 +480,32 @@ func ParseGetV2ProjectsResponse(rsp *http.Response) (*GetV2ProjectsResponse, err
 	return response, nil
 }
 
+// ParseGetV2ServicesResponse parses an HTTP response from a GetV2ServicesWithResponse call
+func ParseGetV2ServicesResponse(rsp *http.Response) (*GetV2ServicesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2ServicesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Services
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// List all customers
@@ -397,6 +514,9 @@ type ServerInterface interface {
 	// List all projects
 	// (GET /v2/projects)
 	GetV2Projects(ctx echo.Context) error
+	// List all customers
+	// (GET /v2/services)
+	GetV2Services(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -430,6 +550,19 @@ func (w *ServerInterfaceWrapper) GetV2Projects(ctx echo.Context) error {
 	return err
 }
 
+// GetV2Services converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2Services(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2Services(ctx)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -460,26 +593,28 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/v2/customers", wrapper.GetV2Customers)
 	router.GET(baseURL+"/v2/projects", wrapper.GetV2Projects)
+	router.GET(baseURL+"/v2/services", wrapper.GetV2Services)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7RVTY/jNgz9K6raoxtnpzfftlOgWLSHBRYtCgRBoMiMrYksqRSVrRH4vxeSP+IkznYG",
-	"xdyUkHp8JN+Tz1zaxlkDhjwvztzLGhqRjs/Bk20A49mhdYCkIEWEJHWCeKLWAS/43loNwvAu43ultdhr",
-	"2JVwEEHTcpa02uIspAxBBRhDqlz+34hmXtITKlOlgKWlQJdxhL+DQih5sYmwA0Y28l8gO6CNBLfZiGr3",
-	"LyAplhvH4u/nIuchRdCkww8IB17w7/PLpPNhzPk0426qJBBFG387UcVG/gPhc8wSpKy5a3kAyGa8lhqa",
-	"Idx3ZIOh3dTK/Vb6BCcqeJQQEGFIebDwiL5zgA9zbld5feGmxjWn7KqFxfbRpuO7qLxxGgjKB+FxLbtH",
-	"mi9BlFqZZd2/3Sih2QO+0ipX5CbnDBDfttDEej6Bb4x+wUlv134WESa0V5lv3Pyd9x75aKpw30yXcQ8y",
-	"oKL2S4QfJOTU7gjtTgSqEy3DC16DKNMM+0Xxv3581lYebWk/OvUbtPxCp//dZQkoeMA3IP3hU+gGKhKF",
-	"fwjQCP2LlYllCV6icv0LwJ9rkEdmAzGqgXkbUAKTtozrDKhjWSLnizyvFNVhv5K2yV8sYNUonxMKeUzq",
-	"NAe7AD7wY96BzBhCzIeSHdA2sZ5CZk3UDvv4+RMrrQwNGEorXrGf4atAyBjVyrNGVTWxE2DLvoLWTBmp",
-	"QwkMEC16ZpF51Tjdsj3E2KDD7+JEFGmYc4mlTk884ydA3/Ncr9arD7EN68AIp3jBf1p9WK2jCATVaWz5",
-	"6Sm/evErSO9A1HFi/KnkBf8V6M+nyzcjKss7a3wvkKf1un9mDYGhXjJOK5nu5y++f5N7wb72W+L7LV8P",
-	"/kuQErw/BM0mfr1qQ9MIbHnBf1eemNCayRlbEpWPHph9QuKt2Pvcb49bnzz+jp1PNf5n4+7Cdez7Yvlu",
-	"7nFebM63ptxsu+zW8pttt4238JQ0sjnfWKhpV3KQYfJRlFq8MZQ/j86+jD/WGP6cuHXb7t8AAAD//1gQ",
-	"n33ICQAA",
+	"H4sIAAAAAAAC/7RVTa/iNhT9K67bZUqY111201epGrWLkZ5aVUIIGeeS+OHY7rXNNEL575WdDwIkFNTH",
+	"znCdc8+5H8dHynVltALlLM2O1PISKhaPr946XQGGs0FtAJ2AGGHciQOEk6sN0IxutZbAFG0SuhVSsq2E",
+	"TQ475qWbvsW11DgKCeWgAAwhkU//r1g1TmkdClXEgHZTgSahCH97gZDTbBVgO4yk5z9BtkPrCa6THlVv",
+	"34G7kK4vi72uCx+HhIMqHn5A2NGMfp+eKp12ZU6HGjdDJobI6vDbsCII+Q+Er+EWc0KrK8kdQDLiNSVo",
+	"hHCtSHvlNoOU6660FwwrYO6CR4TuykzDA/rGAM7euWzl+QcXOc45JWcSJuWjjsenTHllJDjIZ8J9WzZz",
+	"M58Dy6VQ03P/+KL4agt456qckRs2p4O4vUID63EFbpR+YpMen/0kIAxody1f3/mr3ZvboyHDlJg3wIPg",
+	"8NgcfZTZTTR3dntutjPi35D3Qb2yI7S7etVX9+5e3fK8SIB7FK5+C/hdn4zY7KHeMO/KyEvRjJbA8lih",
+	"tiP0rx9fpeZ7nevPRvwGNT3xaX83SQTyFvABpD9sDF1ABaLwjwNUTP6ieWSZg+UoTGvX9LUEvifaO+JK",
+	"IFZ75EC4zkMrPcqQ1jljszQthCv9dsF1lb5rwKISNnXI+D6OodrpCfCOH7EGeEIQwn3IyQ51FfIJJFqF",
+	"RSefv34huea+AuVijxfkZ/jGEBLiSmFJJYrSkQNgTb6BlEQoLn0OBBA1WqKRWFEZWZMthFhnGt+Figgn",
+	"YcwlpDq80IQeAG3Lc7lYLj4FGdqAYkbQjP60+LRYho1lroxlSw8v6dnzXEA07TDIkfGXnGb0V3B/vpwe",
+	"+DBa1mhl2wF5WS7bN1E5UK4dGSMFj9+n77Z9QNuJvffht22Xzwv/5jkHa3dekoFfO7W+qhjWNKO/C+sI",
+	"k5LwEVvHChuWYDT74augfWyO89IHQ36i8iHH/xRuTlx73Sd/7mWPfWZe9uBtT5Q95HhCvweV62bsbTRb",
+	"HS/NaLVukkurW62bdWvJcTdWxwvrqOoF79Yv+kdYsfBFl/7YO9qJWsjR/Tn0ZPTfwLdZN/8GAAD//7E/",
+	"PhqBDAAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
