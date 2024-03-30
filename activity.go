@@ -25,10 +25,7 @@ func NewTimeTracking(clock Clock, projectRepository ProjectRepository, activityR
 }
 
 func (t *TimeTracking) Start(customerID, projectID, serviceID, description string) error {
-	var (
-		customer Customer
-		project  Project
-	)
+	var customer Customer
 
 	customers, err := t.ProjectRepository.GetAllCustomers()
 	if err != nil {
@@ -54,25 +51,11 @@ func (t *TimeTracking) Start(customerID, projectID, serviceID, description strin
 		for _, p := range customer.Projects {
 			if p.ID == projectID {
 				found = true
-				project = p
 			}
 		}
 
 		if !found {
 			return errors.Wrap(ErrProjectNotFound, "search for matching projectID")
-		}
-	}
-
-	{
-		found := false
-		for _, s := range project.Services {
-			if s.ID == serviceID {
-				found = true
-			}
-		}
-
-		if !found {
-			return errors.Wrap(ErrServiceNotFound, "search for matching serviceID")
 		}
 	}
 

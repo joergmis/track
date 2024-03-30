@@ -21,9 +21,8 @@ type Customer struct {
 }
 
 type Project struct {
-	ID       string
-	Name     string
-	Services []Service
+	ID   string
+	Name string
 }
 
 type Service struct {

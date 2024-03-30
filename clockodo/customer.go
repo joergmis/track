@@ -32,47 +32,55 @@ func NewRepository(config Config) (track.ProjectRepository, error) {
 func (r *repository) GetAllCustomers() ([]track.Customer, error) {
 	ctx := context.Background()
 	data := []track.Customer{}
-	var projects []api.Project
 
-	{
-		response, err := r.client.GetV2ProjectsWithResponse(ctx)
-		if err != nil {
-			return data, err
-		}
-
-		projects = response.JSON200.Projects
+	customers, err := r.getAllCustomers(ctx)
+	if err != nil {
+		return data, err
 	}
 
-	{
-		response, err := r.client.GetV2CustomersWithResponse(ctx)
-		if err != nil {
-			return data, err
-		}
+	projects, err := r.getAllProjects(ctx)
+	if err != nil {
+		return data, err
+	}
 
-		customers := response.JSON200.Customers
+	for _, c := range customers {
+		customerProjects := []track.Project{}
 
-		for _, c := range customers {
-			customerProjects := []track.Project{}
-
-			for _, p := range projects {
-				if p.CustomersId == c.Id {
-					customerProjects = append(customerProjects, track.Project{
-						ID:       cleanup(p.Name),
-						Name:     p.Name,
-						Services: []track.Service{},
-					})
-				}
+		for _, p := range projects {
+			if p.CustomersId == c.Id {
+				customerProjects = append(customerProjects, track.Project{
+					ID:   cleanup(p.Name),
+					Name: p.Name,
+				})
 			}
-
-			data = append(data, track.Customer{
-				ID:       cleanup(c.Name),
-				Name:     c.Name,
-				Projects: customerProjects,
-			})
 		}
+
+		data = append(data, track.Customer{
+			ID:       cleanup(c.Name),
+			Name:     c.Name,
+			Projects: customerProjects,
+		})
 	}
 
 	return data, nil
+}
+
+func (r *repository) getAllCustomers(ctx context.Context) ([]api.Customer, error) {
+	response, err := r.client.GetV2CustomersWithResponse(ctx)
+	if err != nil {
+		return []api.Customer{}, err
+	}
+
+	return response.JSON200.Customers, nil
+}
+
+func (r *repository) getAllProjects(ctx context.Context) ([]api.Project, error) {
+	response, err := r.client.GetV2ProjectsWithResponse(ctx)
+	if err != nil {
+		return []api.Project{}, err
+	}
+
+	return response.JSON200.Projects, nil
 }
 
 func cleanup(in string) string {

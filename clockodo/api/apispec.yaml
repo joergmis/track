@@ -12,7 +12,6 @@ servers:
 tags:
   - name: customers
   - name: projects
-  - name: services
 paths:
   /v2/customers:
     get:
@@ -26,18 +25,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Customers'
-  /v2/services:
-    get:
-      tags:
-        - services
-      summary: List all customers
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Services'
   /v2/projects:
     get:
       tags:
@@ -108,37 +95,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
-    Service:
-      type: object
-      required:
-        - id
-        - name
-        - number
-        - active
-        - note
-      properties:
-        id: 
-          type: integer
-        name:
-          type: string
-        number:
-          type: integer
-        active:
-          type: boolean
-        note:
-          type: string
-    Services:
-      type: object
-      required:
-        - paging
-        - services
-      properties:
-        paging:
-          $ref: '#/components/schemas/Pagination'
-        services:
-          type: array
-          items:
-            $ref: '#/components/schemas/Service'
     Customer:
       type: object
       required:

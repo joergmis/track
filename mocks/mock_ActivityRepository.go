@@ -128,8 +128,7 @@ func (_c *MockActivityRepository_GetAllActivities_Call) RunAndReturn(run func() 
 func NewMockActivityRepository(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *MockActivityRepository {
+}) *MockActivityRepository {
 	mock := &MockActivityRepository{}
 	mock.Mock.Test(t)
 

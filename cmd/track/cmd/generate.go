@@ -55,14 +55,6 @@ func init() {
                     {
                         ID: "{{ .ID }}",
                         Name: "\"{{ .Name | html}}\"",
-                        Services: []track.Service{
-                            {{ range .Services }}
-                                {
-                                    ID: "{{ .ID }}",
-                                    Name: "\"{{ .Name | html }}\"",
-                                },
-                            {{ end }}
-                        },
                     },
                 {{ end }}
             },

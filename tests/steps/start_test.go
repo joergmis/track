@@ -37,12 +37,6 @@ func givenTheCustomerExists(ctx context.Context, customer, project, service stri
 			{
 				ID:   project,
 				Name: project,
-				Services: []track.Service{
-					{
-						ID:   service,
-						Name: service,
-					},
-				},
 			},
 		},
 	})
