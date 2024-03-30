@@ -29,7 +29,7 @@ func givenTheDateIs(ctx context.Context, date string) (context.Context, error) {
 	return ctx, nil
 }
 
-func givenTheCustomerExists(ctx context.Context, customer, project, service string) (context.Context, error) {
+func givenTheCustomerExists(ctx context.Context, customer, project string) (context.Context, error) {
 	customers = append(customers, track.Customer{
 		ID:   customer,
 		Name: customer,
@@ -46,7 +46,7 @@ func givenTheCustomerExists(ctx context.Context, customer, project, service stri
 	return ctx, nil
 }
 
-func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, service, description, date string) (context.Context, error) {
+func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, description, date string) (context.Context, error) {
 	_, err := time.Parse(time.DateTime, date)
 	if err != nil {
 		return ctx, errors.Wrap(err, "parse start date string")
@@ -56,17 +56,16 @@ func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, s
 		{
 			CustomerID:  customer,
 			ProjectID:   project,
-			ServiceID:   service,
 			Description: description,
 		},
 	}, nil)
 	return ctx, nil
 }
 
-func whenStartingANewActivityFor(ctx context.Context, customer, project, service, description string) (context.Context, error) {
+func whenStartingANewActivityFor(ctx context.Context, customer, project, description string) (context.Context, error) {
 	timeTracking.ActivityRepository.(*mocks.MockActivityRepository).EXPECT().Add(mock.Anything).Maybe().Return(nil)
 
-	err := timeTracking.Start(customer, project, service, description)
+	err := timeTracking.Start(customer, project, description)
 	if err != nil {
 		return ctx, errors.Wrap(err, "start activity")
 	}
@@ -74,7 +73,7 @@ func whenStartingANewActivityFor(ctx context.Context, customer, project, service
 	return ctx, nil
 }
 
-func thenATimeentryIsAddedFor(ctx context.Context, date, customer, project, service, description string) (context.Context, error) {
+func thenATimeentryIsAddedFor(ctx context.Context, date, customer, project, description string) (context.Context, error) {
 	expectedStart, err := time.Parse(time.DateTime, date)
 	if err != nil {
 		return ctx, errors.Wrap(err, "parse start date string")
@@ -83,7 +82,6 @@ func thenATimeentryIsAddedFor(ctx context.Context, date, customer, project, serv
 	timeTracking.ActivityRepository.(*mocks.MockActivityRepository).AssertCalled(testReference, "Add", track.Activity{
 		CustomerID:  customer,
 		ProjectID:   project,
-		ServiceID:   service,
 		Description: description,
 		Start:       expectedStart,
 	})
@@ -105,12 +103,12 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 	setup()
 
 	ctx.Given(`^the date is "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})"$`, givenTheDateIs)
-	ctx.Given(`^the customer "(\w+)" with project "(\w+)" and service "(\w+)" exists$`, givenTheCustomerExists)
-	ctx.Given(`^there is an activity running for "(\w+)" "(\w+)" "(\w+)" "(\w+)" started on "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})"$`, givenThereIsAnAcitivityRunningFor)
+	ctx.Given(`^the customer "(\w+)" with project "(\w+)" exists$`, givenTheCustomerExists)
+	ctx.Given(`^there is an activity running for "(\w+)" "(\w+)" "(\w+)" started on "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})"$`, givenThereIsAnAcitivityRunningFor)
 
-	ctx.When(`^starting a new activity for "(\w+)" "(\w+)" "(\w+)" "(\w+)"$`, whenStartingANewActivityFor)
+	ctx.When(`^starting a new activity for "(\w+)" "(\w+)" "(\w+)"$`, whenStartingANewActivityFor)
 
-	ctx.Then(`^a time entry is added for "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})" "(\w+)" "(\w+)" "(\w+)" "(\w+)"$`, thenATimeentryIsAddedFor)
+	ctx.Then(`^a time entry is added for "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})" "(\w+)" "(\w+)" "(\w+)"$`, thenATimeentryIsAddedFor)
 }
 
 func TestFeatures(t *testing.T) {
