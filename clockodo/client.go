@@ -7,12 +7,52 @@ import (
 	"net/http"
 
 	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
+	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo/api"
+	"github.com/pkg/errors"
 )
+
+const TimeLayoutString = "2006-01-02T15:04:05Z"
 
 type Config struct {
 	EmailAddress string
 	ApiToken     string
+}
+
+type repository struct {
+	userID int
+	client *api.ClientWithResponses
+}
+
+func NewRepository(config Config) (track.ProjectRepository, error) {
+	repo := &repository{}
+
+	client, err := newClockodoClient(config)
+	if err != nil {
+		return repo, err
+	}
+
+	repo.client = client
+
+	// Get the userID - match it via the email address from the config. The
+	// userID will be necessary to list or add new time entries.
+	// This also serves as a first check if the credentials are correct.
+	response, err := repo.client.GetV2UsersWithResponse(context.Background())
+	if err != nil {
+		return repo, err
+	}
+
+	if response.JSON200 == nil {
+		return repo, errors.New("no data received")
+	}
+
+	for _, user := range response.JSON200.Users {
+		if user.Email == config.EmailAddress {
+			repo.userID = user.Id
+		}
+	}
+
+	return repo, nil
 }
 
 // newClockodoClient sets up a client to interact with the clockodo API. It

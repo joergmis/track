@@ -12,7 +12,22 @@ servers:
 tags:
   - name: customers
   - name: projects
+  - name: entries
+  - name: users
 paths:
+  /v2/users:
+    get:
+      tags:
+        - users
+      summary: Get all users
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+
   /v2/customers:
     get:
       tags:
@@ -37,6 +52,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Projects'
+  /v2/entries:
+    get:
+      tags:
+        - entries
+      summary: Get entries in timeframe
+      parameters:
+        - in: query
+          name: time_since
+          schema:
+            type: string
+            format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
+          required: true
+          description: Start time of interval to return time entries from
+        - in: query
+          name: time_until
+          schema:
+            type: string
+            format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
+          required: true
+          description: End time of interval to return time entries from
+        - in: query
+          name: filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntriesFilter'
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entries'
+  /v2/entriesTexts:
+    get:
+      tags:
+        - entries
+      summary: Get descriptions of time entries
+      parameters:
+        - in: query
+          name: text
+          schema:
+            type: string
+          required: true
+          description: Text to search for
+        - in: query
+          name: filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntriesTextsFilter'
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntriesTexts'
 components:
   schemas:
     Pagination:
@@ -129,6 +204,103 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Customer'
+    EntriesFilter:
+      type: object
+      required:
+        - users_id
+      properties:
+        users_id:
+          type: integer
+    EntriesTextsFilter:
+      type: object
+      required:
+        - users_id
+        - time_since
+        - time_until
+      properties:
+        users_id:
+          type: integer
+        time_since:
+          type: string
+        time_until:
+          type: string
+    Entry:
+      type: object
+      required:
+        - id
+        - customers_id
+        - projects_id
+        - users_id
+        - billable
+        - texts_id
+        - time_since
+        - time_until
+      properties:
+        id:
+          type: integer
+        customers_id:
+          type: integer
+        projects_id:
+          type: integer
+        users_id:
+          type: integer
+        billable:
+          type: integer
+        texts_id:
+          type: integer
+        time_since:
+          type: string
+          format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
+        time_until:
+          type: string
+          format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
+    Entries:
+      type: object
+      required:
+        - paging
+        - entries
+      properties:
+        paging:
+          $ref: '#/components/schemas/Pagination'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+    EntriesTexts:
+      type: object
+      required:
+        - paging
+        - texts
+      properties:
+        paging:
+          $ref: '#/components/schemas/Pagination'
+        texts:
+          type: object
+          patternProperties:
+            '(\d+)':
+              type: string
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+    Users:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
   securitySchemes:
     api_key_auth:
       type: apiKey

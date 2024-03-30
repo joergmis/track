@@ -18,6 +18,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 )
 
 const (
@@ -39,6 +40,42 @@ type Customer struct {
 type Customers struct {
 	Customers []Customer `json:"customers"`
 	Paging    Pagination `json:"paging"`
+}
+
+// Entries defines model for Entries.
+type Entries struct {
+	Entries []Entry    `json:"entries"`
+	Paging  Pagination `json:"paging"`
+}
+
+// EntriesFilter defines model for EntriesFilter.
+type EntriesFilter struct {
+	UsersId int `json:"users_id"`
+}
+
+// EntriesTexts defines model for EntriesTexts.
+type EntriesTexts struct {
+	Paging Pagination             `json:"paging"`
+	Texts  map[string]interface{} `json:"texts"`
+}
+
+// EntriesTextsFilter defines model for EntriesTextsFilter.
+type EntriesTextsFilter struct {
+	TimeSince string `json:"time_since"`
+	TimeUntil string `json:"time_until"`
+	UsersId   int    `json:"users_id"`
+}
+
+// Entry defines model for Entry.
+type Entry struct {
+	Billable    int    `json:"billable"`
+	CustomersId int    `json:"customers_id"`
+	Id          int    `json:"id"`
+	ProjectsId  int    `json:"projects_id"`
+	TextsId     int    `json:"texts_id"`
+	TimeSince   string `json:"time_since"`
+	TimeUntil   string `json:"time_until"`
+	UsersId     int    `json:"users_id"`
 }
 
 // Pagination defines model for Pagination.
@@ -65,6 +102,35 @@ type Project struct {
 type Projects struct {
 	Paging   Pagination `json:"paging"`
 	Projects []Project  `json:"projects"`
+}
+
+// User defines model for User.
+type User struct {
+	Email string `json:"email"`
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+}
+
+// Users defines model for Users.
+type Users struct {
+	Users []User `json:"users"`
+}
+
+// GetV2EntriesParams defines parameters for GetV2Entries.
+type GetV2EntriesParams struct {
+	// TimeSince Start time of interval to return time entries from
+	TimeSince string `form:"time_since" json:"time_since"`
+
+	// TimeUntil End time of interval to return time entries from
+	TimeUntil string        `form:"time_until" json:"time_until"`
+	Filter    EntriesFilter `form:"filter" json:"filter"`
+}
+
+// GetV2EntriesTextsParams defines parameters for GetV2EntriesTexts.
+type GetV2EntriesTextsParams struct {
+	// Text Text to search for
+	Text   string             `form:"text" json:"text"`
+	Filter EntriesTextsFilter `form:"filter" json:"filter"`
 }
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
@@ -143,8 +209,17 @@ type ClientInterface interface {
 	// GetV2Customers request
 	GetV2Customers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV2Entries request
+	GetV2Entries(ctx context.Context, params *GetV2EntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV2EntriesTexts request
+	GetV2EntriesTexts(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV2Projects request
 	GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV2Users request
+	GetV2Users(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetV2Customers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -159,8 +234,44 @@ func (c *Client) GetV2Customers(ctx context.Context, reqEditors ...RequestEditor
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetV2Entries(ctx context.Context, params *GetV2EntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2EntriesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV2EntriesTexts(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2EntriesTextsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV2ProjectsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV2Users(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2UsersRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -198,6 +309,120 @@ func NewGetV2CustomersRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetV2EntriesRequest generates requests for GetV2Entries
+func NewGetV2EntriesRequest(server string, params *GetV2EntriesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/entries")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "time_since", runtime.ParamLocationQuery, params.TimeSince); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "time_until", runtime.ParamLocationQuery, params.TimeUntil); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryParamBuf, err := json.Marshal(params.Filter); err != nil {
+			return nil, err
+		} else {
+			queryValues.Add("filter", string(queryParamBuf))
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV2EntriesTextsRequest generates requests for GetV2EntriesTexts
+func NewGetV2EntriesTextsRequest(server string, params *GetV2EntriesTextsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/entriesTexts")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "text", runtime.ParamLocationQuery, params.Text); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryParamBuf, err := json.Marshal(params.Filter); err != nil {
+			return nil, err
+		} else {
+			queryValues.Add("filter", string(queryParamBuf))
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV2ProjectsRequest generates requests for GetV2Projects
 func NewGetV2ProjectsRequest(server string) (*http.Request, error) {
 	var err error
@@ -208,6 +433,33 @@ func NewGetV2ProjectsRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/v2/projects")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV2UsersRequest generates requests for GetV2Users
+func NewGetV2UsersRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/users")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -271,8 +523,17 @@ type ClientWithResponsesInterface interface {
 	// GetV2CustomersWithResponse request
 	GetV2CustomersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2CustomersResponse, error)
 
+	// GetV2EntriesWithResponse request
+	GetV2EntriesWithResponse(ctx context.Context, params *GetV2EntriesParams, reqEditors ...RequestEditorFn) (*GetV2EntriesResponse, error)
+
+	// GetV2EntriesTextsWithResponse request
+	GetV2EntriesTextsWithResponse(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*GetV2EntriesTextsResponse, error)
+
 	// GetV2ProjectsWithResponse request
 	GetV2ProjectsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ProjectsResponse, error)
+
+	// GetV2UsersWithResponse request
+	GetV2UsersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2UsersResponse, error)
 }
 
 type GetV2CustomersResponse struct {
@@ -291,6 +552,50 @@ func (r GetV2CustomersResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetV2CustomersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV2EntriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Entries
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2EntriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2EntriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV2EntriesTextsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *EntriesTexts
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2EntriesTextsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2EntriesTextsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -319,6 +624,28 @@ func (r GetV2ProjectsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV2UsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Users
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2UsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2UsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetV2CustomersWithResponse request returning *GetV2CustomersResponse
 func (c *ClientWithResponses) GetV2CustomersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2CustomersResponse, error) {
 	rsp, err := c.GetV2Customers(ctx, reqEditors...)
@@ -328,6 +655,24 @@ func (c *ClientWithResponses) GetV2CustomersWithResponse(ctx context.Context, re
 	return ParseGetV2CustomersResponse(rsp)
 }
 
+// GetV2EntriesWithResponse request returning *GetV2EntriesResponse
+func (c *ClientWithResponses) GetV2EntriesWithResponse(ctx context.Context, params *GetV2EntriesParams, reqEditors ...RequestEditorFn) (*GetV2EntriesResponse, error) {
+	rsp, err := c.GetV2Entries(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2EntriesResponse(rsp)
+}
+
+// GetV2EntriesTextsWithResponse request returning *GetV2EntriesTextsResponse
+func (c *ClientWithResponses) GetV2EntriesTextsWithResponse(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*GetV2EntriesTextsResponse, error) {
+	rsp, err := c.GetV2EntriesTexts(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2EntriesTextsResponse(rsp)
+}
+
 // GetV2ProjectsWithResponse request returning *GetV2ProjectsResponse
 func (c *ClientWithResponses) GetV2ProjectsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ProjectsResponse, error) {
 	rsp, err := c.GetV2Projects(ctx, reqEditors...)
@@ -335,6 +680,15 @@ func (c *ClientWithResponses) GetV2ProjectsWithResponse(ctx context.Context, req
 		return nil, err
 	}
 	return ParseGetV2ProjectsResponse(rsp)
+}
+
+// GetV2UsersWithResponse request returning *GetV2UsersResponse
+func (c *ClientWithResponses) GetV2UsersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2UsersResponse, error) {
+	rsp, err := c.GetV2Users(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2UsersResponse(rsp)
 }
 
 // ParseGetV2CustomersResponse parses an HTTP response from a GetV2CustomersWithResponse call
@@ -353,6 +707,58 @@ func ParseGetV2CustomersResponse(rsp *http.Response) (*GetV2CustomersResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest Customers
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV2EntriesResponse parses an HTTP response from a GetV2EntriesWithResponse call
+func ParseGetV2EntriesResponse(rsp *http.Response) (*GetV2EntriesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2EntriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Entries
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV2EntriesTextsResponse parses an HTTP response from a GetV2EntriesTextsWithResponse call
+func ParseGetV2EntriesTextsResponse(rsp *http.Response) (*GetV2EntriesTextsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2EntriesTextsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest EntriesTexts
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -389,14 +795,49 @@ func ParseGetV2ProjectsResponse(rsp *http.Response) (*GetV2ProjectsResponse, err
 	return response, nil
 }
 
+// ParseGetV2UsersResponse parses an HTTP response from a GetV2UsersWithResponse call
+func ParseGetV2UsersResponse(rsp *http.Response) (*GetV2UsersResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2UsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Users
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// List all customers
 	// (GET /v2/customers)
 	GetV2Customers(ctx echo.Context) error
+	// Get entries in timeframe
+	// (GET /v2/entries)
+	GetV2Entries(ctx echo.Context, params GetV2EntriesParams) error
+	// Get descriptions of time entries
+	// (GET /v2/entriesTexts)
+	GetV2EntriesTexts(ctx echo.Context, params GetV2EntriesTextsParams) error
 	// List all projects
 	// (GET /v2/projects)
 	GetV2Projects(ctx echo.Context) error
+	// Get all users
+	// (GET /v2/users)
+	GetV2Users(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -417,6 +858,87 @@ func (w *ServerInterfaceWrapper) GetV2Customers(ctx echo.Context) error {
 	return err
 }
 
+// GetV2Entries converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2Entries(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV2EntriesParams
+	// ------------- Required query parameter "time_since" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "time_since", ctx.QueryParams(), &params.TimeSince)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter time_since: %s", err))
+	}
+
+	// ------------- Required query parameter "time_until" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "time_until", ctx.QueryParams(), &params.TimeUntil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter time_until: %s", err))
+	}
+
+	// ------------- Required query parameter "filter" -------------
+
+	if paramValue := ctx.QueryParam("filter"); paramValue != "" {
+
+		var value EntriesFilter
+		err = json.Unmarshal([]byte(paramValue), &value)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Error unmarshaling parameter 'filter' as JSON")
+		}
+		params.Filter = value
+
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Query argument filter is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2Entries(ctx, params)
+	return err
+}
+
+// GetV2EntriesTexts converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2EntriesTexts(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV2EntriesTextsParams
+	// ------------- Required query parameter "text" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "text", ctx.QueryParams(), &params.Text)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter text: %s", err))
+	}
+
+	// ------------- Required query parameter "filter" -------------
+
+	if paramValue := ctx.QueryParam("filter"); paramValue != "" {
+
+		var value EntriesTextsFilter
+		err = json.Unmarshal([]byte(paramValue), &value)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Error unmarshaling parameter 'filter' as JSON")
+		}
+		params.Filter = value
+
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Query argument filter is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2EntriesTexts(ctx, params)
+	return err
+}
+
 // GetV2Projects converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV2Projects(ctx echo.Context) error {
 	var err error
@@ -427,6 +949,19 @@ func (w *ServerInterfaceWrapper) GetV2Projects(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetV2Projects(ctx)
+	return err
+}
+
+// GetV2Users converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2Users(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2Users(ctx)
 	return err
 }
 
@@ -459,27 +994,37 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/v2/customers", wrapper.GetV2Customers)
+	router.GET(baseURL+"/v2/entries", wrapper.GetV2Entries)
+	router.GET(baseURL+"/v2/entriesTexts", wrapper.GetV2EntriesTexts)
 	router.GET(baseURL+"/v2/projects", wrapper.GetV2Projects)
+	router.GET(baseURL+"/v2/users", wrapper.GetV2Users)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7RVTY/jNgz9K6raoxtnpzfftlOgWLSHBRYtCgRBoMiMrYksqRSVrRH4vxeSP+IkznYG",
-	"xdxkU3p8JN+TzlzaxlkDhjwvztzLGhqRls/Bk20A49qhdYCkIEWEJHWCuKLWAS/43loNwvAu43ultdhr",
-	"2JVwEEHT8i5ptcVZSBmCCjCGVLn834hmntITKlOlgKWlQJdxhL+DQih5sYmwA0Y28l8gO6CNBLfZiGr3",
-	"LyApphvb4u/7IuchRdCkxQ8IB17w7/NLp/OhzfnU427KJBBFG7+dqGIh/4HwOe4SpKy5K3kAyGa8lgqa",
-	"IdxXZIOh3VTK/VT6DU5U8GhDQIRhy4OBR/SdA3y453aU1wduclxzyq5KWCwfbVq+i8obp4GgfBAex7J7",
-	"pPkSRKmVWdb9240Smj3gK61yRW5yzgDxbQtNrOcd+EbrF5z0du1nEWFCe5X5xsnfee+Rj6YM98V0Gfcg",
-	"Aypqv0T4QUJO7Y7Q7kSgOtEyvOA1iDL1sB8U/+vHZ23l0Zb2o1O/QcsvdPrvLktAwQO+AekPn0I3UJEo",
-	"/EOARuhfrEwsS/ASletvAP5cgzwyG4hRDczbgBKYtGUcZ0Ad0xI5X+R5pagO+5W0Tf5iAatG+ZxQyGNS",
-	"pznYBfCBH/MOZMYQ4n4o2QFtE/MpZNZE7bCPnz+x0srQgKE04hX7Gb4KhIxRrTxrVFUTOwG27CtozZSR",
-	"OpTAANGiZxaZV43TLdtDjA06/C52RJGGOZeY6vTEM34C9D3P9Wq9+hDLsA6McIoX/KfVh9U6ikBQndqW",
-	"n57yqxu/gnQPRB0nxp9KXvBfgf58urwZUVneWeN7gTyt1/01awgM9ZJxWsl0Pn/x/Z3cC/a1b4nvp3zd",
-	"+C9BSvD+EDSb+PWqDU0jsOUF/115YkJrJmdsSVQ+emD2hMRTsfa53x6XPnn8HSufcvzPwt2F61j3xfLd",
-	"3OO82JxvTbnZdtmt5TfbbhtP4SlpZHO+sVDTruQgw+SjKLV4Ykh/Hp19aX/MMfycuM3+xVRKgufdtvs3",
-	"AAD//+7WNTbcCQAA",
+	"H4sIAAAAAAAC/8xXUW/jNgz+K5q2hw3zJWm6FUPebt3tUGzACrQ3DGuDQJGZRK0t+Sg616DIfx8k2Y6d",
+	"2EnTNcPeElMm+X38KNLPXJo0Mxo0WT565lYuIBX+52VuyaSA7neGJgMkBd4iJKkluF+0yoCP+NSYBITm",
+	"64hPVZKIaQKTGGYiT6j9lDSJwZpJaYI5oDOpuP25Fmk9pCVUeu4NhtoM64gjfM4VQsxHd85t4SMq829J",
+	"tvBWJjiOSq9m+gCSXLiSFrvLi6ybFEHqf3yDMOMj/nV/w3S/oLlfcbyuIglEsXL/MzF3QA54uHanBCmj",
+	"dyAXDqJaXm2APmjCAkATDmwMLwLjHK1Oi6RMaQ+OX1VCbaLNLaCdtKtrK1x1dE+YW3iiFs6OhxpxqlwJ",
+	"IkB93fD47f19/P137QLfSq6LtRDgEJgu4kilMLFKy/b28+Zck0paza+hParHbETowrDaTbvs7fbbpGqJ",
+	"Sdd90/U8Q+Mid7/o2e62NticGUwF8RG/uvmD/XQxOGOfbi8jBr15j93z4WB49m5w8e58cHs2HJ3/MPrx",
+	"4m8eHSrB2/g8om6+Yg1CmyxF9cpWZakRdVy9a82zewObXNOkuq1a6u4PZGIOXQdyRCiOdAjDeZ9kgJ1n",
+	"tvlpvrAVo5lT1IDQCj8we5qpnGYJEMQd5oM9E4OIE6XbL4rjB3ueTgFfONq39FdM+sLF/pFfZV1nYA/1",
+	"b3TtZzVvL5qvZeV3JmzXvV9FaAPzybZd9pCKjov8yPLtWb9CjK6cbMfofjFNHtghjoLLcdsItSBzVLS6",
+	"cf6K1srU5BFWE5HTwueh+YgvQMReW4EB/te7y8TIRxOb95n6DVabW1WE/+vIO3Khj/Dk4ey4conCk9sW",
+	"RPKLkT7LGKxElYWbkV8uQD4ykxOjBTBrcpTApIldBXJMXFiizI76/bmiRT7tSZP2HwzgPFW2Tyjkoy+7",
+	"npkW50V+zGYgI4bgzkPMZmhSF08hM9r1FHt/fcViI/MUNHnp99jP8EUgRIwWyrJUzRfEloAr9gWShCkt",
+	"kzwGBogGLTPIrEqzZMWm4GxFf37lxwS56b7JxYVaDnnEl4A25DnoDXpnDobJQItM8RE/7531Bq45BC08",
+	"bf3lsN/Y3Ofg70enQJ/xVcxH/CPQn8PN7u/UZDOjbRDIcDAI40cTaAqSyRIl/fv9BxtmVVDoS78JbKhy",
+	"k/ibXEqwdpYnrMovqDZPU+H2IP67ssREkjBZy5bE3Drd1z4F3FsOe23N70ZefiQ43lCkQJ6ru21d3JBA",
+	"Ym6AMzNj7pbApUgYGSeRHHUwFRG9WngUeuBzDrjatEBjIdg0LmEOUY3Ht9h11tE2ig86fjMMYY/5LzC8",
+	"ifiaH1FegG3QZsG+DWs9PmFflBJ8XVd8BKpqpkINZxjmUdkb1cflVmdUn3oH2yOcPNAj7pBTkwWBcsFm",
+	"Brv0A0+0VzknFkH9q/D/qITA9uvlUHvJulav9/U+WdQXt25JVMviCYmoYvzLSZFtci1Rb3bHEna1hXVj",
+	"DvvbCQGHAK8vuQOb2+ZILFbBdX338227tazdjV2DNVfBu7ETugVclr3eXK3SVU8W64nfr9wK4t4oYj+X",
+	"XbQZyy5G8bAqQe1ZKcbao5D/erz+JwAA//95SMCyzBUAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

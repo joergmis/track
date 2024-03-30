@@ -6,28 +6,8 @@ import (
 
 	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo/api"
+	"github.com/pkg/errors"
 )
-
-var repo *repository
-
-type repository struct {
-	client *api.ClientWithResponses
-}
-
-func NewRepository(config Config) (track.ProjectRepository, error) {
-	if repo == nil {
-		repo = &repository{}
-
-		client, err := newClockodoClient(config)
-		if err != nil {
-			return repo, err
-		}
-
-		repo.client = client
-	}
-
-	return repo, nil
-}
 
 func (r *repository) GetAllCustomers() ([]track.Customer, error) {
 	ctx := context.Background()
@@ -71,6 +51,10 @@ func (r *repository) getAllCustomers(ctx context.Context) ([]api.Customer, error
 		return []api.Customer{}, err
 	}
 
+	if response.JSON200 == nil {
+		return []api.Customer{}, errors.New("no data received")
+	}
+
 	return response.JSON200.Customers, nil
 }
 
@@ -80,9 +64,16 @@ func (r *repository) getAllProjects(ctx context.Context) ([]api.Project, error) 
 		return []api.Project{}, err
 	}
 
+	if response.JSON200 == nil {
+		return []api.Project{}, errors.New("no data received")
+	}
+
 	return response.JSON200.Projects, nil
 }
 
+// cleanup names in order for them being consistent and not having whitespaces
+// in the name since this creates (probably) some issues with the
+// autocompletion on the commandline..
 func cleanup(in string) string {
 	replacer := strings.NewReplacer(
 		" ", "_",
