@@ -116,6 +116,26 @@ type Users struct {
 	Users []User `json:"users"`
 }
 
+// WorkTimeDay defines model for WorkTimeDay.
+type WorkTimeDay struct {
+	Date      string             `json:"date"`
+	Intervals []WorkTimeInterval `json:"intervals"`
+	Offset    int                `json:"offset"`
+	UsersId   int                `json:"users_id"`
+}
+
+// WorkTimeDays defines model for WorkTimeDays.
+type WorkTimeDays struct {
+	Paging       Pagination    `json:"paging"`
+	WorkTimeDays []WorkTimeDay `json:"work_time_days"`
+}
+
+// WorkTimeInterval defines model for WorkTimeInterval.
+type WorkTimeInterval struct {
+	TimeSince string `json:"time_since"`
+	TimeUntil string `json:"time_until"`
+}
+
 // GetV2EntriesParams defines parameters for GetV2Entries.
 type GetV2EntriesParams struct {
 	// TimeSince Start time of interval to return time entries from
@@ -131,6 +151,12 @@ type GetV2EntriesTextsParams struct {
 	// Text Text to search for
 	Text   string             `form:"text" json:"text"`
 	Filter EntriesTextsFilter `form:"filter" json:"filter"`
+}
+
+// GetV2WorkTimesParams defines parameters for GetV2WorkTimes.
+type GetV2WorkTimesParams struct {
+	DateSince string `form:"date_since" json:"date_since"`
+	DateUntil string `form:"date_until" json:"date_until"`
 }
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
@@ -220,6 +246,9 @@ type ClientInterface interface {
 
 	// GetV2Users request
 	GetV2Users(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV2WorkTimes request
+	GetV2WorkTimes(ctx context.Context, params *GetV2WorkTimesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetV2Customers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -272,6 +301,18 @@ func (c *Client) GetV2Projects(ctx context.Context, reqEditors ...RequestEditorF
 
 func (c *Client) GetV2Users(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV2UsersRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV2WorkTimes(ctx context.Context, params *GetV2WorkTimesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2WorkTimesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -477,6 +518,63 @@ func NewGetV2UsersRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetV2WorkTimesRequest generates requests for GetV2WorkTimes
+func NewGetV2WorkTimesRequest(server string, params *GetV2WorkTimesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/workTimes")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "date_since", runtime.ParamLocationQuery, params.DateSince); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "date_until", runtime.ParamLocationQuery, params.DateUntil); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -534,6 +632,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetV2UsersWithResponse request
 	GetV2UsersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2UsersResponse, error)
+
+	// GetV2WorkTimesWithResponse request
+	GetV2WorkTimesWithResponse(ctx context.Context, params *GetV2WorkTimesParams, reqEditors ...RequestEditorFn) (*GetV2WorkTimesResponse, error)
 }
 
 type GetV2CustomersResponse struct {
@@ -646,6 +747,28 @@ func (r GetV2UsersResponse) StatusCode() int {
 	return 0
 }
 
+type GetV2WorkTimesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkTimeDays
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2WorkTimesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2WorkTimesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetV2CustomersWithResponse request returning *GetV2CustomersResponse
 func (c *ClientWithResponses) GetV2CustomersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2CustomersResponse, error) {
 	rsp, err := c.GetV2Customers(ctx, reqEditors...)
@@ -689,6 +812,15 @@ func (c *ClientWithResponses) GetV2UsersWithResponse(ctx context.Context, reqEdi
 		return nil, err
 	}
 	return ParseGetV2UsersResponse(rsp)
+}
+
+// GetV2WorkTimesWithResponse request returning *GetV2WorkTimesResponse
+func (c *ClientWithResponses) GetV2WorkTimesWithResponse(ctx context.Context, params *GetV2WorkTimesParams, reqEditors ...RequestEditorFn) (*GetV2WorkTimesResponse, error) {
+	rsp, err := c.GetV2WorkTimes(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2WorkTimesResponse(rsp)
 }
 
 // ParseGetV2CustomersResponse parses an HTTP response from a GetV2CustomersWithResponse call
@@ -821,6 +953,32 @@ func ParseGetV2UsersResponse(rsp *http.Response) (*GetV2UsersResponse, error) {
 	return response, nil
 }
 
+// ParseGetV2WorkTimesResponse parses an HTTP response from a GetV2WorkTimesWithResponse call
+func ParseGetV2WorkTimesResponse(rsp *http.Response) (*GetV2WorkTimesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2WorkTimesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkTimeDays
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// List all customers
@@ -838,6 +996,9 @@ type ServerInterface interface {
 	// Get all users
 	// (GET /v2/users)
 	GetV2Users(ctx echo.Context) error
+	// Get descriptions of time entries
+	// (GET /v2/workTimes)
+	GetV2WorkTimes(ctx echo.Context, params GetV2WorkTimesParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -965,6 +1126,35 @@ func (w *ServerInterfaceWrapper) GetV2Users(ctx echo.Context) error {
 	return err
 }
 
+// GetV2WorkTimes converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2WorkTimes(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV2WorkTimesParams
+	// ------------- Required query parameter "date_since" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "date_since", ctx.QueryParams(), &params.DateSince)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter date_since: %s", err))
+	}
+
+	// ------------- Required query parameter "date_until" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "date_until", ctx.QueryParams(), &params.DateUntil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter date_until: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2WorkTimes(ctx, params)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -998,33 +1188,36 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/v2/entriesTexts", wrapper.GetV2EntriesTexts)
 	router.GET(baseURL+"/v2/projects", wrapper.GetV2Projects)
 	router.GET(baseURL+"/v2/users", wrapper.GetV2Users)
+	router.GET(baseURL+"/v2/workTimes", wrapper.GetV2WorkTimes)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

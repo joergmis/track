@@ -13,18 +13,10 @@ import (
 func (r *repository) GetTimeEntries(start, end time.Time) ([]track.Activity, error) {
 	data := []track.Activity{}
 
-	response, err := r.client.GetV2EntriesWithResponse(context.Background(), &api.GetV2EntriesParams{
-		TimeSince: start.Format(TimeLayoutString),
-		TimeUntil: end.Format(TimeLayoutString),
-		Filter: api.EntriesFilter{
-			UsersId: r.userID,
-		},
+	response, err := r.client.GetV2WorkTimesWithResponse(context.Background(), &api.GetV2WorkTimesParams{
+		DateSince: start.Format(time.DateOnly),
+		DateUntil: end.Format(time.DateOnly),
 	})
-	if err != nil {
-		return data, err
-	}
-
-	texts, err := r.getEntriesTexts(start, end)
 	if err != nil {
 		return data, err
 	}
@@ -33,15 +25,23 @@ func (r *repository) GetTimeEntries(start, end time.Time) ([]track.Activity, err
 		return data, errors.New("no data received")
 	}
 
-	for _, entry := range response.JSON200.Entries {
-		text, ok := texts[entry.TextsId]
-		if !ok {
-			return data, errors.New("no matching description found")
-		}
+	for _, day := range response.JSON200.WorkTimeDays {
+		for _, entry := range day.Intervals {
+			start, err := time.Parse(TimeLayoutString, entry.TimeSince)
+			if err != nil {
+				return data, err
+			}
 
-		data = append(data, track.Activity{
-			Description: text,
-		})
+			end, err := time.Parse(TimeLayoutString, entry.TimeUntil)
+			if err != nil {
+				return data, err
+			}
+
+			data = append(data, track.Activity{
+				Start: start,
+				End:   end,
+			})
+		}
 	}
 
 	return data, nil
@@ -51,7 +51,7 @@ func (r *repository) getEntriesTexts(start, end time.Time) (map[int]string, erro
 	data := map[int]string{}
 
 	response, err := r.client.GetV2EntriesTextsWithResponse(context.Background(), &api.GetV2EntriesTextsParams{
-		Text: "",
+		Text: "", // TODO: not allowed to be empty
 		Filter: api.EntriesTextsFilter{
 			TimeSince: start.Format(TimeLayoutString),
 			TimeUntil: end.Format(TimeLayoutString),

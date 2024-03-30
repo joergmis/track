@@ -112,6 +112,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntriesTexts'
+  /v2/workTimes:
+    get:
+      tags:
+        - entries
+      summary: Get descriptions of time entries
+      parameters:
+        - in: query
+          name: date_since
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: date_until
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkTimeDays'
 components:
   schemas:
     Pagination:
@@ -279,6 +302,46 @@ components:
           patternProperties:
             '(\d+)':
               type: string
+    WorkTimeInterval:
+      type: object
+      required:
+        - time_since
+        - time_until
+      properties:
+        time_since:
+          type: string
+        time_until:
+          type: string
+    WorkTimeDay:
+      type: object
+      required:
+        - date
+        - users_id
+        - offset
+        - intervals
+      properties:
+        date:
+          type: string
+        users_id:
+          type: integer
+        offset:
+          type: integer
+        intervals:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkTimeInterval'
+    WorkTimeDays:
+      type: object
+      required:
+        - paging
+        - work_time_days
+      properties:
+        paging:
+          $ref: '#/components/schemas/Pagination'
+        work_time_days:
+          type: array 
+          items:
+            $ref: '#/components/schemas/WorkTimeDay'
     User:
       type: object
       required:
