@@ -1,10 +1,18 @@
 # track
 
-Timetracking application.
+Timetracking application with primary focus on adding time-entries and 
+visualising them.
 
-* copy `track.example.yaml` to `track.yaml` and adjust the values
+## Setup
+
+* copy `track.example.yaml` to `~/.config/track.yaml` and adjust the values
 * install app by running `make install`
-* setup completion; `track completion bash > /tmp/completion && source /tmp/completion`
+* ensure `~/go/bin` is in your `$PATH`
+* optional; setup bash completion
+  * `track completion bash > /tmp/completion`
+  * `source /tmp/completion`
+
+## References
 
 Loosely inspired by:
 
