@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/joergmis/track/clockodo"
@@ -25,9 +28,22 @@ var (
 			entries, err := repo.GetTimeEntries(start, end)
 			cobra.CheckErr(err)
 
-			for _, entry := range entries {
-				fmt.Printf("%v\n", entry)
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
+
+			headings := []string{
+				"start",
+				"end",
+				"duration",
+				"description",
 			}
+
+			fmt.Fprintf(w, "%s\n", strings.Join(headings, "\t"))
+
+			for _, entry := range entries {
+				fmt.Fprintf(w, "%v\t%v\t%v\t%s\t%s\t%s\n", entry.Start.Format(time.TimeOnly), entry.End.Format(time.TimeOnly), entry.End.Sub(entry.Start), entry.CustomerID, entry.ProjectID, entry.Description)
+			}
+
+			w.Flush()
 		},
 	}
 )

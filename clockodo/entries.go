@@ -29,6 +29,16 @@ func (r *repository) GetTimeEntries(start, end time.Time) ([]track.Activity, err
 		return data, errors.New("no data received")
 	}
 
+	customers, err := r.getAllCustomers(context.Background())
+	if err != nil {
+		return data, err
+	}
+
+	projects, err := r.getAllProjects(context.Background())
+	if err != nil {
+		return data, err
+	}
+
 	for _, entry := range response.JSON200.Entries {
 		start, err := time.Parse(TimeLayoutString, entry.TimeSince)
 		if err != nil {
@@ -40,11 +50,25 @@ func (r *repository) GetTimeEntries(start, end time.Time) ([]track.Activity, err
 			return data, err
 		}
 
-		data = append(data, track.Activity{
+		activity := track.Activity{
 			Description: entry.Text,
 			Start:       start,
 			End:         end,
-		})
+		}
+
+		for _, project := range projects {
+			if project.Id == entry.ProjectsId {
+				activity.ProjectID = cleanup(project.Name)
+			}
+		}
+
+		for _, customer := range customers {
+			if customer.Id == entry.CustomersId {
+				activity.CustomerID = cleanup(customer.Name)
+			}
+		}
+
+		data = append(data, activity)
 	}
 
 	return data, nil
