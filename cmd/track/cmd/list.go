@@ -26,7 +26,7 @@ var (
 			cobra.CheckErr(err)
 
 			for _, entry := range entries {
-				fmt.Println(entry.Description)
+				fmt.Printf("%v\n", entry)
 			}
 		},
 	}
