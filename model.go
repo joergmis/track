@@ -33,7 +33,8 @@ type Service struct {
 type Activity struct {
 	ID          string
 	CustomerID  string
-	ProjectID   string
+	ProjectID   string // Project of a customer
+	ServicesID  string // A service such as development
 	Description string
 	Start       time.Time
 	End         time.Time

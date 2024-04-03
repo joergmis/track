@@ -73,3 +73,51 @@ func (r *repository) GetTimeEntries(start, end time.Time) ([]track.Activity, err
 
 	return data, nil
 }
+
+func (r *repository) AddTimeEntry(activity track.Activity) error {
+	var (
+		customer api.Customer
+		project  api.Project
+	)
+
+	customers, err := r.getAllCustomers(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, c := range customers {
+		if activity.CustomerID == cleanup(c.Name) {
+			customer = c
+		}
+	}
+
+	projects, err := r.getAllProjects(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, p := range projects {
+		if activity.ProjectID == cleanup(p.Name) {
+			project = p
+		}
+	}
+
+	// use the project default for the billing setting
+	billable := 0
+	if project.BillableDefault {
+		billable = 1
+	}
+
+	response, err := r.client.PostV2EntriesWithResponse(context.Background(), &api.PostV2EntriesParams{
+		CustomersId: customer.Id,
+		Billable:    api.PostV2EntriesParamsBillable(billable),
+		TimeSince:   activity.Start.Format(TimeLayoutString),
+		TimeUntil:   activity.End.Format(TimeLayoutString),
+	})
+	if err != nil {
+		log.Println(string(response.Body))
+		return err
+	}
+
+	return nil
+}

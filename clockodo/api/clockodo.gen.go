@@ -26,6 +26,13 @@ const (
 	Api_user_authScopes = "api_user_auth.Scopes"
 )
 
+// Defines values for PostV2EntriesParamsBillable.
+const (
+	N0 PostV2EntriesParamsBillable = 0
+	N1 PostV2EntriesParamsBillable = 1
+	N2 PostV2EntriesParamsBillable = 2
+)
+
 // Customer defines model for Customer.
 type Customer struct {
 	Active          bool   `json:"active"`
@@ -105,6 +112,18 @@ type Projects struct {
 	Projects []Project  `json:"projects"`
 }
 
+// Service defines model for Service.
+type Service struct {
+	Active bool   `json:"active"`
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+}
+
+// Services defines model for Services.
+type Services struct {
+	Services []Service `json:"services"`
+}
+
 // User defines model for User.
 type User struct {
 	Email string `json:"email"`
@@ -146,6 +165,18 @@ type GetV2EntriesParams struct {
 	TimeUntil string        `form:"time_until" json:"time_until"`
 	Filter    EntriesFilter `form:"filter" json:"filter"`
 }
+
+// PostV2EntriesParams defines parameters for PostV2Entries.
+type PostV2EntriesParams struct {
+	CustomersId int                         `form:"customers_id" json:"customers_id"`
+	ServicesId  int                         `form:"services_id" json:"services_id"`
+	Billable    PostV2EntriesParamsBillable `form:"billable" json:"billable"`
+	TimeSince   string                      `form:"time_since" json:"time_since"`
+	TimeUntil   string                      `form:"time_until" json:"time_until"`
+}
+
+// PostV2EntriesParamsBillable defines parameters for PostV2Entries.
+type PostV2EntriesParamsBillable int
 
 // GetV2EntriesTextsParams defines parameters for GetV2EntriesTexts.
 type GetV2EntriesTextsParams struct {
@@ -239,11 +270,17 @@ type ClientInterface interface {
 	// GetV2Entries request
 	GetV2Entries(ctx context.Context, params *GetV2EntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostV2Entries request
+	PostV2Entries(ctx context.Context, params *PostV2EntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV2EntriesTexts request
 	GetV2EntriesTexts(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV2Projects request
 	GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV2Services request
+	GetV2Services(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV2Users request
 	GetV2Users(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -276,6 +313,18 @@ func (c *Client) GetV2Entries(ctx context.Context, params *GetV2EntriesParams, r
 	return c.Client.Do(req)
 }
 
+func (c *Client) PostV2Entries(ctx context.Context, params *PostV2EntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV2EntriesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV2EntriesTexts(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV2EntriesTextsRequest(c.Server, params)
 	if err != nil {
@@ -290,6 +339,18 @@ func (c *Client) GetV2EntriesTexts(ctx context.Context, params *GetV2EntriesText
 
 func (c *Client) GetV2Projects(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV2ProjectsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV2Services(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV2ServicesRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -420,6 +481,99 @@ func NewGetV2EntriesRequest(server string, params *GetV2EntriesParams) (*http.Re
 	return req, nil
 }
 
+// NewPostV2EntriesRequest generates requests for PostV2Entries
+func NewPostV2EntriesRequest(server string, params *PostV2EntriesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/entries")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "customers_id", runtime.ParamLocationQuery, params.CustomersId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "services_id", runtime.ParamLocationQuery, params.ServicesId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "billable", runtime.ParamLocationQuery, params.Billable); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "time_since", runtime.ParamLocationQuery, params.TimeSince); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "time_until", runtime.ParamLocationQuery, params.TimeUntil); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV2EntriesTextsRequest generates requests for GetV2EntriesTexts
 func NewGetV2EntriesTextsRequest(server string, params *GetV2EntriesTextsParams) (*http.Request, error) {
 	var err error
@@ -481,6 +635,33 @@ func NewGetV2ProjectsRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/v2/projects")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV2ServicesRequest generates requests for GetV2Services
+func NewGetV2ServicesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/services")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -631,11 +812,17 @@ type ClientWithResponsesInterface interface {
 	// GetV2EntriesWithResponse request
 	GetV2EntriesWithResponse(ctx context.Context, params *GetV2EntriesParams, reqEditors ...RequestEditorFn) (*GetV2EntriesResponse, error)
 
+	// PostV2EntriesWithResponse request
+	PostV2EntriesWithResponse(ctx context.Context, params *PostV2EntriesParams, reqEditors ...RequestEditorFn) (*PostV2EntriesResponse, error)
+
 	// GetV2EntriesTextsWithResponse request
 	GetV2EntriesTextsWithResponse(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*GetV2EntriesTextsResponse, error)
 
 	// GetV2ProjectsWithResponse request
 	GetV2ProjectsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ProjectsResponse, error)
+
+	// GetV2ServicesWithResponse request
+	GetV2ServicesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ServicesResponse, error)
 
 	// GetV2UsersWithResponse request
 	GetV2UsersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2UsersResponse, error)
@@ -688,6 +875,28 @@ func (r GetV2EntriesResponse) StatusCode() int {
 	return 0
 }
 
+type PostV2EntriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Entry
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV2EntriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV2EntriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV2EntriesTextsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -726,6 +935,28 @@ func (r GetV2ProjectsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetV2ProjectsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV2ServicesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Services
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV2ServicesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV2ServicesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -794,6 +1025,15 @@ func (c *ClientWithResponses) GetV2EntriesWithResponse(ctx context.Context, para
 	return ParseGetV2EntriesResponse(rsp)
 }
 
+// PostV2EntriesWithResponse request returning *PostV2EntriesResponse
+func (c *ClientWithResponses) PostV2EntriesWithResponse(ctx context.Context, params *PostV2EntriesParams, reqEditors ...RequestEditorFn) (*PostV2EntriesResponse, error) {
+	rsp, err := c.PostV2Entries(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV2EntriesResponse(rsp)
+}
+
 // GetV2EntriesTextsWithResponse request returning *GetV2EntriesTextsResponse
 func (c *ClientWithResponses) GetV2EntriesTextsWithResponse(ctx context.Context, params *GetV2EntriesTextsParams, reqEditors ...RequestEditorFn) (*GetV2EntriesTextsResponse, error) {
 	rsp, err := c.GetV2EntriesTexts(ctx, params, reqEditors...)
@@ -810,6 +1050,15 @@ func (c *ClientWithResponses) GetV2ProjectsWithResponse(ctx context.Context, req
 		return nil, err
 	}
 	return ParseGetV2ProjectsResponse(rsp)
+}
+
+// GetV2ServicesWithResponse request returning *GetV2ServicesResponse
+func (c *ClientWithResponses) GetV2ServicesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV2ServicesResponse, error) {
+	rsp, err := c.GetV2Services(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV2ServicesResponse(rsp)
 }
 
 // GetV2UsersWithResponse request returning *GetV2UsersResponse
@@ -882,6 +1131,32 @@ func ParseGetV2EntriesResponse(rsp *http.Response) (*GetV2EntriesResponse, error
 	return response, nil
 }
 
+// ParsePostV2EntriesResponse parses an HTTP response from a PostV2EntriesWithResponse call
+func ParsePostV2EntriesResponse(rsp *http.Response) (*PostV2EntriesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV2EntriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Entry
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV2EntriesTextsResponse parses an HTTP response from a GetV2EntriesTextsWithResponse call
 func ParseGetV2EntriesTextsResponse(rsp *http.Response) (*GetV2EntriesTextsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -924,6 +1199,32 @@ func ParseGetV2ProjectsResponse(rsp *http.Response) (*GetV2ProjectsResponse, err
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest Projects
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV2ServicesResponse parses an HTTP response from a GetV2ServicesWithResponse call
+func ParseGetV2ServicesResponse(rsp *http.Response) (*GetV2ServicesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV2ServicesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Services
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -994,12 +1295,18 @@ type ServerInterface interface {
 	// Get entries in timeframe. Example call (note the structure of the filter query): https://my.clockodo.com/api/v2/entries?time_since=2024-03-24T23:00:00Z&time_until=2024-03-31T21:59:59Z&filter[users_id]=286820&page=1
 	// (GET /v2/entries)
 	GetV2Entries(ctx echo.Context, params GetV2EntriesParams) error
+	// Add a time entry
+	// (POST /v2/entries)
+	PostV2Entries(ctx echo.Context, params PostV2EntriesParams) error
 	// Get descriptions of time entries
 	// (GET /v2/entriesTexts)
 	GetV2EntriesTexts(ctx echo.Context, params GetV2EntriesTextsParams) error
 	// List all projects
 	// (GET /v2/projects)
 	GetV2Projects(ctx echo.Context) error
+	// Get all services. It looks like they are not project-specifc and not  tied to one specifically.
+	// (GET /v2/services)
+	GetV2Services(ctx echo.Context) error
 	// Get all users
 	// (GET /v2/users)
 	GetV2Users(ctx echo.Context) error
@@ -1062,6 +1369,56 @@ func (w *ServerInterfaceWrapper) GetV2Entries(ctx echo.Context) error {
 	return err
 }
 
+// PostV2Entries converts echo context to params.
+func (w *ServerInterfaceWrapper) PostV2Entries(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostV2EntriesParams
+	// ------------- Required query parameter "customers_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "customers_id", ctx.QueryParams(), &params.CustomersId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter customers_id: %s", err))
+	}
+
+	// ------------- Required query parameter "services_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "services_id", ctx.QueryParams(), &params.ServicesId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter services_id: %s", err))
+	}
+
+	// ------------- Required query parameter "billable" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "billable", ctx.QueryParams(), &params.Billable)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter billable: %s", err))
+	}
+
+	// ------------- Required query parameter "time_since" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "time_since", ctx.QueryParams(), &params.TimeSince)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter time_since: %s", err))
+	}
+
+	// ------------- Required query parameter "time_until" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "time_until", ctx.QueryParams(), &params.TimeUntil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter time_until: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostV2Entries(ctx, params)
+	return err
+}
+
 // GetV2EntriesTexts converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV2EntriesTexts(ctx echo.Context) error {
 	var err error
@@ -1109,6 +1466,19 @@ func (w *ServerInterfaceWrapper) GetV2Projects(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetV2Projects(ctx)
+	return err
+}
+
+// GetV2Services converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV2Services(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(Api_user_authScopes, []string{})
+
+	ctx.Set(Api_key_authScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetV2Services(ctx)
 	return err
 }
 
@@ -1184,8 +1554,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/v2/customers", wrapper.GetV2Customers)
 	router.GET(baseURL+"/v2/entries", wrapper.GetV2Entries)
+	router.POST(baseURL+"/v2/entries", wrapper.PostV2Entries)
 	router.GET(baseURL+"/v2/entriesTexts", wrapper.GetV2EntriesTexts)
 	router.GET(baseURL+"/v2/projects", wrapper.GetV2Projects)
+	router.GET(baseURL+"/v2/services", wrapper.GetV2Services)
 	router.GET(baseURL+"/v2/users", wrapper.GetV2Users)
 	router.GET(baseURL+"/v2/workTimes", wrapper.GetV2WorkTimes)
 
@@ -1194,31 +1566,34 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -13,8 +13,23 @@ tags:
   - name: customers
   - name: projects
   - name: entries
+  - name: services
   - name: users
 paths:
+  /v2/services:
+    get:
+      tags:
+        - services
+      summary: >
+        Get all services. It looks like they are not project-specifc and not 
+        tied to one specifically.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Services'
   /v2/users:
     get:
       tags:
@@ -27,7 +42,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Users'
-
   /v2/customers:
     get:
       tags:
@@ -53,6 +67,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/Projects'
   /v2/entries:
+    post:
+      tags:
+        - entries
+      summary: Add a time entry
+      parameters:
+        - in: query
+          name: customers_id
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: services_id
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: billable
+          schema:
+            type: integer
+            description: 0 = not billable, 1 = billable, 2 = already billed
+            enum:
+              - 0
+              - 1
+              - 2
+          required: true
+        - in: query
+          name: time_since
+          schema:
+            type: string
+            format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
+          required: true
+        - in: query
+          name: time_until
+          schema:
+            type: string
+            format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
     get:
       tags:
         - entries
@@ -153,6 +211,28 @@ components:
           type: integer
         count_items:
           type: integer
+    Service:
+      type: object
+      required:
+        - id
+        - name
+        - active
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        active:
+          type: boolean
+    Services:
+      type: object
+      required:
+        - services
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
     Project:
       type: object
       required:
