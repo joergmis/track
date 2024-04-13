@@ -14,6 +14,8 @@ var (
 	ErrNotInitialized    = errors.New("repository has not been initialized")
 )
 
+type Service []string
+
 type Customer struct {
 	ID       string
 	Name     string
@@ -25,16 +27,12 @@ type Project struct {
 	Name string
 }
 
-type Service struct {
-	ID   string
-	Name string
-}
-
 type Activity struct {
 	ID          string
+	Synced      bool
 	CustomerID  string
 	ProjectID   string // Project of a customer
-	ServicesID  string // A service such as development
+	ServiceID   string // A service such as development
 	Description string
 	Start       time.Time
 	End         time.Time
@@ -48,4 +46,6 @@ type ActivityRepository interface {
 type ProjectRepository interface {
 	GetAllCustomers() ([]Customer, error)
 	GetTimeEntries(start, end time.Time) ([]Activity, error)
+	GetAllServices() ([]string, error)
+	AddTimeEntry(activity Activity) error
 }

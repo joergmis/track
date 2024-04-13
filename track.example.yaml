@@ -1,3 +1,5 @@
 clockodo:
   email: your@email.ch
   token: your-api-token
+storage:
+  filepath: ~/.config/track

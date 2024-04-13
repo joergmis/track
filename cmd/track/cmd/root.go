@@ -3,15 +3,19 @@ package cmd
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo"
+	"github.com/joergmis/track/local"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	repo         track.ProjectRepository
+	repo    track.ProjectRepository
+	storage track.Storage
+
 	// only used for autocompletion!
 	services     []string
 	customerData []track.Customer
@@ -35,7 +39,6 @@ func init() {
 	viper.SetConfigName("track")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("$HOME/.config/")
-	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -51,11 +54,20 @@ func init() {
 		log.Fatal("no apikey set in configuration")
 	}
 
+	if !viper.IsSet("storage.dir") {
+		log.Fatal("no storage filepath set in configuration")
+	}
+
 	repo, err = clockodo.NewRepository(clockodo.Config{
 		EmailAddress: viper.GetString("clockodo.email"),
 		ApiToken:     viper.GetString("clockodo.token"),
 	})
 	if err != nil {
 		log.Fatalf("setup clockodo repository: %v", err)
+	}
+
+	storage, err = local.NewStorage(filepath.Join(os.Getenv("HOME"), ".config", viper.GetString("storage.dir")))
+	if err != nil {
+		log.Fatalf("setup storage repository: %v", err)
 	}
 }
