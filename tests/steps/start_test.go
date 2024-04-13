@@ -54,8 +54,8 @@ func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, d
 
 	timeTracking.ActivityRepository.(*mocks.MockActivityRepository).EXPECT().GetAllActivities().Maybe().Return([]track.Activity{
 		{
-			CustomerID:  customer,
-			ProjectID:   project,
+			Customer:    customer,
+			Project:     project,
 			Description: description,
 		},
 	}, nil)
@@ -80,10 +80,10 @@ func thenATimeentryIsAddedFor(ctx context.Context, date, customer, project, desc
 	}
 
 	timeTracking.ActivityRepository.(*mocks.MockActivityRepository).AssertCalled(testReference, "Add", track.Activity{
-		CustomerID:  customer,
-		ProjectID:   project,
+		Customer:    customer,
+		Project:     project,
 		Description: description,
-		Start:       expectedStart,
+		StartTime:   expectedStart,
 	})
 
 	return ctx, nil

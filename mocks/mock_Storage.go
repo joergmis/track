@@ -123,6 +123,107 @@ func (_c *MockStorage_GetActivities_Call) RunAndReturn(run func() ([]track.Activ
 	return _c
 }
 
+// GetLastActivity provides a mock function with given fields:
+func (_m *MockStorage) GetLastActivity() (track.Activity, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLastActivity")
+	}
+
+	var r0 track.Activity
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (track.Activity, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() track.Activity); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(track.Activity)
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockStorage_GetLastActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastActivity'
+type MockStorage_GetLastActivity_Call struct {
+	*mock.Call
+}
+
+// GetLastActivity is a helper method to define mock.On call
+func (_e *MockStorage_Expecter) GetLastActivity() *MockStorage_GetLastActivity_Call {
+	return &MockStorage_GetLastActivity_Call{Call: _e.mock.On("GetLastActivity")}
+}
+
+func (_c *MockStorage_GetLastActivity_Call) Run(run func()) *MockStorage_GetLastActivity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockStorage_GetLastActivity_Call) Return(_a0 track.Activity, _a1 error) *MockStorage_GetLastActivity_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockStorage_GetLastActivity_Call) RunAndReturn(run func() (track.Activity, error)) *MockStorage_GetLastActivity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateActivity provides a mock function with given fields: activity
+func (_m *MockStorage) UpdateActivity(activity track.Activity) error {
+	ret := _m.Called(activity)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateActivity")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
+		r0 = rf(activity)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockStorage_UpdateActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateActivity'
+type MockStorage_UpdateActivity_Call struct {
+	*mock.Call
+}
+
+// UpdateActivity is a helper method to define mock.On call
+//   - activity track.Activity
+func (_e *MockStorage_Expecter) UpdateActivity(activity interface{}) *MockStorage_UpdateActivity_Call {
+	return &MockStorage_UpdateActivity_Call{Call: _e.mock.On("UpdateActivity", activity)}
+}
+
+func (_c *MockStorage_UpdateActivity_Call) Run(run func(activity track.Activity)) *MockStorage_UpdateActivity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(track.Activity))
+	})
+	return _c
+}
+
+func (_c *MockStorage_UpdateActivity_Call) Return(_a0 error) *MockStorage_UpdateActivity_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockStorage_UpdateActivity_Call) RunAndReturn(run func(track.Activity) error) *MockStorage_UpdateActivity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockStorage creates a new instance of MockStorage. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockStorage(t interface {

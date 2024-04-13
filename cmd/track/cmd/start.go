@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"strings"
-	"time"
 
 	"github.com/joergmis/track"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -24,23 +25,26 @@ autocompletion for your prefered shell.`,
 		service := args[2]
 		description := strings.Join(args[3:], " ")
 
-		_ = track.Activity{
-			CustomerID:  customer,
-			ProjectID:   project,
-			ServiceID:   service,
-			Description: description,
-			Start:       time.Now(),
+		previousActivity, err := storage.GetLastActivity()
+		if err != nil {
+			if errors.Cause(err) != track.ErrNoActivities {
+				log.Fatalf("get last activity: %v", err)
+			}
+		} else {
+			previousActivity.End()
+			if err := storage.UpdateActivity(previousActivity); err != nil {
+				log.Fatalf("stop the previous activity: %v", err)
+			}
 		}
 
-		dryrun, err := cmd.PersistentFlags().GetBool("dryrun")
-		cobra.CheckErr(err)
+		newActivity := track.NewActivity(customer, project, service, description)
+		newActivity.Start()
 
-		if dryrun {
-			fmt.Printf("customer: %s\n", customer)
-			fmt.Printf("project: %s\n", project)
-			fmt.Printf("service: %s\n", service)
-			fmt.Printf("description: %s\n", description)
+		if err := storage.AddActivity(newActivity); err != nil {
+			log.Fatalf("start new activity: %v", err)
 		}
+
+		fmt.Printf("started new activity: %v\n", newActivity)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		// used for the autocompletion feature - this only works if the data
@@ -75,7 +79,4 @@ autocompletion for your prefered shell.`,
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-
-	// TODO: switch to false / remove flag
-	startCmd.PersistentFlags().Bool("dryrun", true, "dry-run - don't start actual activities")
 }

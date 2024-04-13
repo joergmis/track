@@ -3,6 +3,7 @@ package track
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -60,13 +61,34 @@ func (t *TimeTracking) Start(customerID, projectID, description string) error {
 	}
 
 	if err := t.ActivityRepository.Add(Activity{
-		CustomerID:  customerID,
-		ProjectID:   projectID,
+		Customer:    customerID,
+		Project:     projectID,
 		Description: description,
-		Start:       t.Clock.Now(),
+		StartTime:   t.Clock.Now(),
 	}); err != nil {
 		return errors.Wrap(err, "add new activity")
 	}
 
 	return nil
+}
+
+func NewActivity(customer, project, service, description string) Activity {
+	return Activity{
+		ID:          uuid.New().String(),
+		Synced:      false,
+		InProgress:  true,
+		Customer:    customer,
+		Project:     project,
+		Service:     service,
+		Description: description,
+	}
+}
+
+func (a *Activity) Start() {
+	a.StartTime = time.Now()
+}
+
+func (a *Activity) End() {
+	a.EndTime = time.Now()
+	a.InProgress = false
 }

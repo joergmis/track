@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/joergmis/track"
 	"github.com/pkg/errors"
@@ -100,4 +101,47 @@ func (s *storage) setData(savedata save) error {
 	}
 
 	return nil
+}
+
+func (s *storage) GetLastActivity() (track.Activity, error) {
+	activity := track.Activity{}
+
+	data, err := s.getData()
+	if err != nil {
+		return activity, err
+	}
+
+	if len(data.Activities) == 0 {
+		return activity, track.ErrNoActivities
+	}
+
+	sort.Slice(data.Activities, func(i, j int) bool {
+		return data.Activities[i].StartTime.Before(data.Activities[j].StartTime)
+	})
+
+	activity = data.Activities[len(data.Activities)-1]
+
+	return activity, nil
+}
+
+func (s *storage) UpdateActivity(activity track.Activity) error {
+	data, err := s.getData()
+	if err != nil {
+		return err
+	}
+
+	found := false
+
+	for i, act := range data.Activities {
+		if act.ID == activity.ID {
+			found = true
+			data.Activities[i] = activity
+		}
+	}
+
+	if !found {
+		return track.ErrNoMatchingActivity
+	}
+
+	return s.setData(data)
 }

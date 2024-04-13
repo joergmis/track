@@ -40,7 +40,7 @@ var (
 			fmt.Fprintf(w, "%s\n", strings.Join(headings, "\t"))
 
 			for _, entry := range entries {
-				fmt.Fprintf(w, "%v\t%v\t%v\t%s\t%s\t%s\n", entry.Start.Format(time.TimeOnly), entry.End.Format(time.TimeOnly), entry.End.Sub(entry.Start), entry.CustomerID, entry.ProjectID, entry.Description)
+				fmt.Fprintf(w, "%v\t%v\t%v\t%s\t%s\t%s\n", entry.StartTime.Format(time.TimeOnly), entry.EndTime.Format(time.TimeOnly), entry.EndTime.Sub(entry.StartTime), entry.Customer, entry.Project, entry.Description)
 			}
 
 			w.Flush()

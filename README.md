@@ -24,7 +24,7 @@ go run cmd/track/main.go generate
 Now you are ready to install the app:
 
 ```bash
-go install cmd/track
+go install ./cmd/track
 ```
 
 Check if app has been installed; if the app is not found, check if `~/go/bin` 

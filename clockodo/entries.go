@@ -52,19 +52,19 @@ func (r *repository) GetTimeEntries(start, end time.Time) ([]track.Activity, err
 
 		activity := track.Activity{
 			Description: entry.Text,
-			Start:       start,
-			End:         end,
+			StartTime:   start,
+			EndTime:     end,
 		}
 
 		for _, project := range projects {
 			if project.Id == entry.ProjectsId {
-				activity.ProjectID = cleanup(project.Name)
+				activity.Project = cleanup(project.Name)
 			}
 		}
 
 		for _, customer := range customers {
 			if customer.Id == entry.CustomersId {
-				activity.CustomerID = cleanup(customer.Name)
+				activity.Customer = cleanup(customer.Name)
 			}
 		}
 
@@ -86,7 +86,7 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 	}
 
 	for _, c := range customers {
-		if activity.CustomerID == cleanup(c.Name) {
+		if activity.Customer == cleanup(c.Name) {
 			customer = c
 		}
 	}
@@ -99,7 +99,7 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 	}
 
 	for _, p := range projects {
-		if activity.ProjectID == cleanup(p.Name) {
+		if activity.Project == cleanup(p.Name) {
 			project = p
 		}
 	}
@@ -115,8 +115,8 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 	response, err := r.client.PostV2EntriesWithResponse(context.Background(), &api.PostV2EntriesParams{
 		CustomersId: customer.Id,
 		Billable:    api.PostV2EntriesParamsBillable(billable),
-		TimeSince:   activity.Start.Format(TimeLayoutString),
-		TimeUntil:   activity.End.Format(TimeLayoutString),
+		TimeSince:   activity.StartTime.Format(TimeLayoutString),
+		TimeUntil:   activity.EndTime.Format(TimeLayoutString),
 	})
 	if err != nil {
 		log.Println(string(response.Body))

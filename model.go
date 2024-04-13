@@ -28,14 +28,24 @@ type Project struct {
 }
 
 type Activity struct {
-	ID          string
-	Synced      bool
-	CustomerID  string
-	ProjectID   string // Project of a customer
-	ServiceID   string // A service such as development
+	// ID is a uuid mainly for storage; this does not correspond to any
+	// supported backend.
+	ID string
+
+	// TODO: sync / in progress seem like implementation details? Maybe even
+	// the ID...
+	// Synced keeps track if the activity has been synced.
+	Synced bool
+	// InProgress indicates that the activity is not yet finished.
+	InProgress bool
+
+	Customer    string
+	Project     string
+	Service     string
 	Description string
-	Start       time.Time
-	End         time.Time
+
+	StartTime time.Time
+	EndTime   time.Time
 }
 
 type ActivityRepository interface {
