@@ -2,22 +2,25 @@ package clockodo
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 func (r *repository) GetAllServices() ([]string, error) {
+	services := []string{}
+
 	response, err := r.client.GetV2ServicesWithResponse(context.Background())
 	if err != nil {
-		return []string{}, nil
+		return services, err
 	}
 
 	if response.JSON200 == nil {
-		return []string{}, nil
+		return services, errors.New("no data found")
 	}
 
 	for _, service := range response.JSON200.Services {
-		fmt.Println(service.Name)
+		services = append(services, service.Name)
 	}
 
-	return []string{}, nil
+	return services, nil
 }

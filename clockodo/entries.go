@@ -91,6 +91,8 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 		}
 	}
 
+	// TODO: check if customer was identified
+
 	projects, err := r.getAllProjects(context.Background())
 	if err != nil {
 		return err
@@ -101,6 +103,8 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 			project = p
 		}
 	}
+
+	// TODO: check if project was identified
 
 	// use the project default for the billing setting
 	billable := 0
