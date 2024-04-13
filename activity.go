@@ -89,6 +89,8 @@ func (a *Activity) Start() {
 }
 
 func (a *Activity) End() {
-	a.EndTime = time.Now()
+	// in case the activity is stopped when a new one is started, this makes
+	// sure that they don't overlap
+	a.EndTime = time.Now().Add(-1 * time.Second)
 	a.InProgress = false
 }

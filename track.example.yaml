@@ -1,5 +1,5 @@
 clockodo:
-  email: your@email.ch
-  token: your-api-token
+  email: your@email.ch          # user account for clockodo
+  token: your-api-token         # can be found in the clockodo settings
 storage:
-  filepath: ~/.config/track
+  dir: track                    # folder will be appended to $HOME/.config/<your-dir>
