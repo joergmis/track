@@ -31,7 +31,7 @@ autocompletion for your prefered shell.`,
 				log.Fatalf("get last activity: %v", err)
 			}
 		} else {
-			previousActivity.End()
+			previousActivity.Stop()
 			if err := storage.UpdateActivity(previousActivity); err != nil {
 				log.Fatalf("stop the previous activity: %v", err)
 			}
