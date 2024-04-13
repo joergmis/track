@@ -12,6 +12,8 @@ import (
 
 var (
 	repo         track.ProjectRepository
+	// only used for autocompletion!
+	services     []string
 	customerData []track.Customer
 
 	rootCmd = &cobra.Command{

@@ -1,21 +1,49 @@
 # track
 
-Timetracking application with primary focus on adding time-entries and 
-visualising them.
+Timetracking application with focus on:
 
-## Setup
+- [local-first](https://www.inkandswitch.com/local-first/)
+- adding time entries
+- visualisation of hours
 
-* copy `track.example.yaml` to `~/.config/track.yaml` and adjust the values
-* install app by running `make install`
-* ensure `~/go/bin` is in your `$PATH`
-* optional; setup bash completion
-  * `track completion bash > /tmp/completion`
-  * `source /tmp/completion`
+## Setup and installation
+
+Copy the configuration file and adjust the values.
+
+```bash
+cp track.example.yaml ~/.config/track.yaml
+```
+
+Generate the list of projects/clients/services which is required for the 
+autocompletion to work.
+
+```bash
+go run cmd/track/main.go generate
+```
+
+Now you are ready to install the app:
+
+```bash
+go install cmd/track
+```
+
+Check if app has been installed; if the app is not found, check if `~/go/bin` 
+is in $PATH.
+
+```bash
+track version
+```
+
+To make it easier to use, set up autocompletion:
+
+```bash
+track completion bash > /tmp/completion
+source /tmp/completion
+```
 
 ## References
 
 Loosely inspired by:
 
-- [gotimetrack](https://github.com/danielbatw/gotimetrack)
 - [timewarrior](https://github.com/GothenburgBitFactory/timewarrior)
 - [goddd](https://github.com/marcusolsson/goddd)
