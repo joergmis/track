@@ -3,11 +3,10 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"os"
-	"strings"
-	"text/tabwriter"
 	"time"
 
+	"github.com/cheynewallace/tabby"
+	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo"
 	"github.com/spf13/cobra"
 )
@@ -31,47 +30,37 @@ var (
 			end, err := time.Parse(clockodo.TimeLayoutString, listEntriesTo)
 			cobra.CheckErr(err)
 
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
-
-			headings := []string{
-				"start",
-				"end",
-				"duration",
-				"customer",
-				"project",
-				"service",
-				"description",
-			}
-
-			fmt.Fprintf(w, "%s\n", strings.Join(headings, "\t"))
+			t := tabby.New()
+			t.AddHeader("time", "duration", "customer", "project", "description")
 
 			for _, entry := range activities {
 				if entry.StartTime.Before(start) || entry.StartTime.After(end) || entry.EndTime.After(end) {
 					continue
 				}
 
-				duration := ""
-				if entry.EndTime.Sub(entry.StartTime) < 0 {
-					duration = "in progress"
-				} else {
-					duration = fmt.Sprintf("%v", entry.EndTime.Sub(entry.StartTime))
-				}
-
-				fmt.Fprintf(w, "%v\t%v\t%v\t%s\t%s\t%s\t%s\n",
-					entry.StartTime.Format(time.TimeOnly),
-					entry.EndTime.Format(time.TimeOnly),
-					duration,
+				t.AddLine(
+					fmt.Sprintf("%s - %s", entry.StartTime.Format(time.TimeOnly), entry.EndTime.Format(time.TimeOnly)),
+					getDuration(entry),
 					entry.Customer,
 					entry.Project,
-					entry.Service,
 					entry.Description,
 				)
 			}
 
-			w.Flush()
+			t.Print()
 		},
 	}
 )
+
+func getDuration(activity track.Activity) string {
+	duration := int(activity.EndTime.Sub(activity.StartTime).Minutes())
+
+	if duration >= 0 {
+		return fmt.Sprintf("%d min", duration)
+	}
+
+	return "in progress"
+}
 
 func init() {
 	rootCmd.AddCommand(listCmd)
