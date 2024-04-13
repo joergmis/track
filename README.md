@@ -6,6 +6,10 @@ Timetracking application with focus on:
 - adding time entries
 - visualisation of hours
 
+The goal is to have a generic timetracking application, which can be extended
+to sync timeentries or pull data like customers or projects from different 
+services (starting with clockodo).
+
 ## Setup and installation
 
 Copy the configuration file and adjust the values.
