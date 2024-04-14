@@ -104,6 +104,21 @@ paths:
             type: string
             format: ISO 8601 UTC, e.g. "2021-06-30T12:34:56Z
           required: true
+        - in: query
+          name: users_id
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: projects_id
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: text
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: Successful operation

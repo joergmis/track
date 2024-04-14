@@ -138,6 +138,9 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 	response, err := r.client.PostV2EntriesWithResponse(context.Background(), &api.PostV2EntriesParams{
 		CustomersId: customer.Id,
 		ServicesId:  service.Id,
+		ProjectsId:  project.Id,
+		Text:        activity.Description,
+		UsersId:     r.userID,
 		Billable:    api.PostV2EntriesParamsBillable(billable),
 		TimeSince:   activity.StartTime.Format(TimeLayoutString),
 		TimeUntil:   activity.EndTime.Format(TimeLayoutString),
