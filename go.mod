@@ -3,6 +3,7 @@ module github.com/joergmis/track
 go 1.21.3
 
 require (
+	github.com/cheynewallace/tabby v1.1.1
 	github.com/cucumber/godog v0.14.0
 	github.com/deepmap/oapi-codegen/v2 v2.1.0
 	github.com/getkin/kin-openapi v0.123.0
@@ -17,7 +18,6 @@ require (
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/cheynewallace/tabby v1.1.1 // indirect
 	github.com/cucumber/gherkin/go/v26 v26.2.0 // indirect
 	github.com/cucumber/messages/go/v21 v21.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

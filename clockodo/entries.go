@@ -78,6 +78,7 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 	var (
 		customer api.Customer
 		project  api.Project
+		service  api.Service
 	)
 
 	customers, err := r.getAllCustomers(context.Background())
@@ -85,26 +86,48 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 		return err
 	}
 
+	found := false
 	for _, c := range customers {
 		if activity.Customer == cleanup(c.Name) {
+			found = true
 			customer = c
 		}
 	}
-
-	// TODO: check if customer was identified
+	if !found {
+		return track.ErrCustomerNotFound
+	}
 
 	projects, err := r.getAllProjects(context.Background())
 	if err != nil {
 		return err
 	}
 
+	found = false
 	for _, p := range projects {
 		if activity.Project == cleanup(p.Name) {
 			project = p
+			found = true
 		}
 	}
+	if !found {
+		return track.ErrProjectNotFound
+	}
 
-	// TODO: check if project was identified
+	services, err := r.getAllServices()
+	if err != nil {
+		return err
+	}
+
+	found = false
+	for _, svc := range services {
+		if activity.Service == svc.Name {
+			service = svc
+			found = true
+		}
+	}
+	if !found {
+		return track.ErrServiceNotFound
+	}
 
 	// use the project default for the billing setting
 	billable := 0
@@ -114,6 +137,7 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 
 	response, err := r.client.PostV2EntriesWithResponse(context.Background(), &api.PostV2EntriesParams{
 		CustomersId: customer.Id,
+		ServicesId:  service.Id,
 		Billable:    api.PostV2EntriesParamsBillable(billable),
 		TimeSince:   activity.StartTime.Format(TimeLayoutString),
 		TimeUntil:   activity.EndTime.Format(TimeLayoutString),
@@ -122,6 +146,7 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 		log.Println(string(response.Body))
 		return err
 	}
+	log.Println(string(response.Body))
 
 	return nil
 }

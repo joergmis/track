@@ -16,10 +16,10 @@ var generateCmd = &cobra.Command{
 the list has to be generated in advance before building the
 application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		customers, err := repo.GetAllCustomers()
+		customers, err := backend.GetAllCustomers()
 		cobra.CheckErr(err)
 
-		services, err := repo.GetAllServices()
+		services, err := backend.GetAllServices()
 		cobra.CheckErr(err)
 
 		tmpl, err := template.New("data").Parse(fileTemplate)

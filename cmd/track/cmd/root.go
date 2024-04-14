@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	repo    track.ProjectRepository
+	backend track.ProjectRepository
 	storage track.Storage
 
 	// only used for autocompletion!
@@ -58,7 +58,7 @@ func init() {
 		log.Fatal("no storage filepath set in configuration")
 	}
 
-	repo, err = clockodo.NewRepository(clockodo.Config{
+	backend, err = clockodo.NewRepository(clockodo.Config{
 		EmailAddress: viper.GetString("clockodo.email"),
 		ApiToken:     viper.GetString("clockodo.token"),
 	})
