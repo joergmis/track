@@ -3,34 +3,65 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/joergmis/track/clockodo"
+	"github.com/cheynewallace/tabby"
+	"github.com/joergmis/track"
 	"github.com/spf13/cobra"
 )
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Get an overview over the currently active time tracking",
+	Short: "Get an overview over the timetracking",
 	Run: func(cmd *cobra.Command, args []string) {
-		activity, err := storage.GetLastActivity()
+		activities, err := storage.GetActivities()
 		if err != nil {
-			log.Fatalf("get last activity: %v", err)
+			log.Fatalf("get all activities from storage: %v", err)
 		}
 
-		fmt.Println("currently tracking:")
-		fmt.Println("")
-		fmt.Printf("customer:    %s\n", activity.Customer)
-		fmt.Printf("project:     %s\n", activity.Project)
-		fmt.Printf("service:     %s\n", activity.Service)
-		fmt.Printf("description: %s\n", activity.Description)
-		fmt.Printf("start:       %s\n", activity.StartTime.Format(clockodo.TimeLayoutString))
-		if activity.InProgress {
-			fmt.Println("end:        -- ongoing --")
-		} else {
-			fmt.Printf("end:         %s\n", activity.EndTime.Format(clockodo.TimeLayoutString))
+		inRange := []track.Activity{}
+
+		start := time.Now().Add(-24 * time.Hour)
+		end := time.Now().Add(1 * time.Hour)
+
+		t := tabby.New()
+		t.AddHeader("time", "duration", "customer", "project", "description")
+
+		for _, entry := range activities {
+			if entry.StartTime.Before(start) || entry.StartTime.After(end) || entry.EndTime.After(end) {
+				continue
+			}
+
+			inRange = append(inRange, entry)
 		}
-		fmt.Println("")
+
+		if len(inRange) == 0 {
+			fmt.Println("-- no activities in range --")
+			return
+		}
+
+		for _, entry := range inRange {
+			t.AddLine(
+				fmt.Sprintf("%s - %s", entry.StartTime.Format(time.TimeOnly), entry.EndTime.Format(time.TimeOnly)),
+				getDuration(entry),
+				entry.Customer,
+				entry.Project,
+				entry.Description,
+			)
+		}
+
+		t.Print()
 	},
+}
+
+func getDuration(activity track.Activity) string {
+	duration := int(activity.EndTime.Sub(activity.StartTime).Minutes())
+
+	if duration >= 0 {
+		return fmt.Sprintf("%d min", duration)
+	}
+
+	return "in progress"
 }
 
 func init() {
