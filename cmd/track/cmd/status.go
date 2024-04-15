@@ -24,9 +24,6 @@ var statusCmd = &cobra.Command{
 		start := time.Now().Add(-24 * time.Hour)
 		end := time.Now().Add(1 * time.Hour)
 
-		t := tabby.New()
-		t.AddHeader("time", "duration", "customer", "project", "description")
-
 		for _, entry := range activities {
 			if entry.StartTime.Before(start) || entry.StartTime.After(end) || entry.EndTime.After(end) {
 				continue
@@ -39,6 +36,9 @@ var statusCmd = &cobra.Command{
 			fmt.Println("-- no activities in range --")
 			return
 		}
+
+		t := tabby.New()
+		t.AddHeader("time", "duration", "customer", "project", "description")
 
 		for _, entry := range inRange {
 			t.AddLine(

@@ -21,7 +21,7 @@ type save struct {
 	Activities []track.Activity
 }
 
-func NewStorage(path string) (track.Storage, error) {
+func NewStorage(path string) (track.ActivityRepository, error) {
 	strg := &storage{
 		location: path,
 	}
@@ -142,6 +142,31 @@ func (s *storage) UpdateActivity(activity track.Activity) error {
 	if !found {
 		return track.ErrNoMatchingActivity
 	}
+
+	return s.setData(data)
+}
+
+func (s *storage) DeleteActivity(activity track.Activity) error {
+	data, err := s.getData()
+	if err != nil {
+		return err
+	}
+
+	index := 0
+	found := false
+
+	for i, act := range data.Activities {
+		if act.ID == activity.ID {
+			index = i
+			found = true
+		}
+	}
+
+	if !found {
+		return track.ErrNoMatchingActivity
+	}
+
+	data.Activities = append(data.Activities[:index], data.Activities[index+1:]...)
 
 	return s.setData(data)
 }

@@ -8,7 +8,7 @@ var (
 )
 
 // Storage keeps a list of all activities locally available.
-type Storage interface {
+type ActivityRepository interface {
 	// GetLastActivity checks the stored activities and returns the activity
 	// which has the oldest start time. In case there is no previous data,
 	// 'ErrNoActivities' is returned.
@@ -25,4 +25,9 @@ type Storage interface {
 	// one. Returns [ErrNoMatchingActivity] if no activity matches the ID of
 	// the given activity.
 	UpdateActivity(activity Activity) error
+
+	// DeleteActivity deletes a given activity from the storage. Returns
+	// [ErrNoMatchingActivity] if no activity matches the ID of the given
+	// activity.
+	DeleteActivity(activity Activity) error
 }

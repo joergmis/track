@@ -149,7 +149,6 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 		log.Println(string(response.Body))
 		return err
 	}
-	log.Println(string(response.Body))
 
 	return nil
 }

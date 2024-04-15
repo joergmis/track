@@ -20,12 +20,12 @@ func (_m *MockActivityRepository) EXPECT() *MockActivityRepository_Expecter {
 	return &MockActivityRepository_Expecter{mock: &_m.Mock}
 }
 
-// Add provides a mock function with given fields: activity
-func (_m *MockActivityRepository) Add(activity track.Activity) error {
+// AddActivity provides a mock function with given fields: activity
+func (_m *MockActivityRepository) AddActivity(activity track.Activity) error {
 	ret := _m.Called(activity)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Add")
+		panic("no return value specified for AddActivity")
 	}
 
 	var r0 error
@@ -38,40 +38,86 @@ func (_m *MockActivityRepository) Add(activity track.Activity) error {
 	return r0
 }
 
-// MockActivityRepository_Add_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Add'
-type MockActivityRepository_Add_Call struct {
+// MockActivityRepository_AddActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddActivity'
+type MockActivityRepository_AddActivity_Call struct {
 	*mock.Call
 }
 
-// Add is a helper method to define mock.On call
+// AddActivity is a helper method to define mock.On call
 //   - activity track.Activity
-func (_e *MockActivityRepository_Expecter) Add(activity interface{}) *MockActivityRepository_Add_Call {
-	return &MockActivityRepository_Add_Call{Call: _e.mock.On("Add", activity)}
+func (_e *MockActivityRepository_Expecter) AddActivity(activity interface{}) *MockActivityRepository_AddActivity_Call {
+	return &MockActivityRepository_AddActivity_Call{Call: _e.mock.On("AddActivity", activity)}
 }
 
-func (_c *MockActivityRepository_Add_Call) Run(run func(activity track.Activity)) *MockActivityRepository_Add_Call {
+func (_c *MockActivityRepository_AddActivity_Call) Run(run func(activity track.Activity)) *MockActivityRepository_AddActivity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(track.Activity))
 	})
 	return _c
 }
 
-func (_c *MockActivityRepository_Add_Call) Return(_a0 error) *MockActivityRepository_Add_Call {
+func (_c *MockActivityRepository_AddActivity_Call) Return(_a0 error) *MockActivityRepository_AddActivity_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockActivityRepository_Add_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_Add_Call {
+func (_c *MockActivityRepository_AddActivity_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_AddActivity_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetAllActivities provides a mock function with given fields:
-func (_m *MockActivityRepository) GetAllActivities() ([]track.Activity, error) {
+// DeleteActivity provides a mock function with given fields: activity
+func (_m *MockActivityRepository) DeleteActivity(activity track.Activity) error {
+	ret := _m.Called(activity)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteActivity")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
+		r0 = rf(activity)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockActivityRepository_DeleteActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteActivity'
+type MockActivityRepository_DeleteActivity_Call struct {
+	*mock.Call
+}
+
+// DeleteActivity is a helper method to define mock.On call
+//   - activity track.Activity
+func (_e *MockActivityRepository_Expecter) DeleteActivity(activity interface{}) *MockActivityRepository_DeleteActivity_Call {
+	return &MockActivityRepository_DeleteActivity_Call{Call: _e.mock.On("DeleteActivity", activity)}
+}
+
+func (_c *MockActivityRepository_DeleteActivity_Call) Run(run func(activity track.Activity)) *MockActivityRepository_DeleteActivity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(track.Activity))
+	})
+	return _c
+}
+
+func (_c *MockActivityRepository_DeleteActivity_Call) Return(_a0 error) *MockActivityRepository_DeleteActivity_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockActivityRepository_DeleteActivity_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_DeleteActivity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetActivities provides a mock function with given fields:
+func (_m *MockActivityRepository) GetActivities() ([]track.Activity, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetAllActivities")
+		panic("no return value specified for GetActivities")
 	}
 
 	var r0 []track.Activity
@@ -96,29 +142,130 @@ func (_m *MockActivityRepository) GetAllActivities() ([]track.Activity, error) {
 	return r0, r1
 }
 
-// MockActivityRepository_GetAllActivities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllActivities'
-type MockActivityRepository_GetAllActivities_Call struct {
+// MockActivityRepository_GetActivities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetActivities'
+type MockActivityRepository_GetActivities_Call struct {
 	*mock.Call
 }
 
-// GetAllActivities is a helper method to define mock.On call
-func (_e *MockActivityRepository_Expecter) GetAllActivities() *MockActivityRepository_GetAllActivities_Call {
-	return &MockActivityRepository_GetAllActivities_Call{Call: _e.mock.On("GetAllActivities")}
+// GetActivities is a helper method to define mock.On call
+func (_e *MockActivityRepository_Expecter) GetActivities() *MockActivityRepository_GetActivities_Call {
+	return &MockActivityRepository_GetActivities_Call{Call: _e.mock.On("GetActivities")}
 }
 
-func (_c *MockActivityRepository_GetAllActivities_Call) Run(run func()) *MockActivityRepository_GetAllActivities_Call {
+func (_c *MockActivityRepository_GetActivities_Call) Run(run func()) *MockActivityRepository_GetActivities_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *MockActivityRepository_GetAllActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetAllActivities_Call {
+func (_c *MockActivityRepository_GetActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetActivities_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockActivityRepository_GetAllActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetAllActivities_Call {
+func (_c *MockActivityRepository_GetActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetActivities_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetLastActivity provides a mock function with given fields:
+func (_m *MockActivityRepository) GetLastActivity() (track.Activity, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLastActivity")
+	}
+
+	var r0 track.Activity
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (track.Activity, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() track.Activity); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(track.Activity)
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockActivityRepository_GetLastActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastActivity'
+type MockActivityRepository_GetLastActivity_Call struct {
+	*mock.Call
+}
+
+// GetLastActivity is a helper method to define mock.On call
+func (_e *MockActivityRepository_Expecter) GetLastActivity() *MockActivityRepository_GetLastActivity_Call {
+	return &MockActivityRepository_GetLastActivity_Call{Call: _e.mock.On("GetLastActivity")}
+}
+
+func (_c *MockActivityRepository_GetLastActivity_Call) Run(run func()) *MockActivityRepository_GetLastActivity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockActivityRepository_GetLastActivity_Call) Return(_a0 track.Activity, _a1 error) *MockActivityRepository_GetLastActivity_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockActivityRepository_GetLastActivity_Call) RunAndReturn(run func() (track.Activity, error)) *MockActivityRepository_GetLastActivity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateActivity provides a mock function with given fields: activity
+func (_m *MockActivityRepository) UpdateActivity(activity track.Activity) error {
+	ret := _m.Called(activity)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateActivity")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
+		r0 = rf(activity)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockActivityRepository_UpdateActivity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateActivity'
+type MockActivityRepository_UpdateActivity_Call struct {
+	*mock.Call
+}
+
+// UpdateActivity is a helper method to define mock.On call
+//   - activity track.Activity
+func (_e *MockActivityRepository_Expecter) UpdateActivity(activity interface{}) *MockActivityRepository_UpdateActivity_Call {
+	return &MockActivityRepository_UpdateActivity_Call{Call: _e.mock.On("UpdateActivity", activity)}
+}
+
+func (_c *MockActivityRepository_UpdateActivity_Call) Run(run func(activity track.Activity)) *MockActivityRepository_UpdateActivity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(track.Activity))
+	})
+	return _c
+}
+
+func (_c *MockActivityRepository_UpdateActivity_Call) Return(_a0 error) *MockActivityRepository_UpdateActivity_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockActivityRepository_UpdateActivity_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_UpdateActivity_Call {
 	_c.Call.Return(run)
 	return _c
 }

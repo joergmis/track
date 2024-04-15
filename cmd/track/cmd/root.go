@@ -14,7 +14,7 @@ import (
 
 var (
 	backend track.ProjectRepository
-	storage track.Storage
+	storage track.ActivityRepository
 
 	// only used for autocompletion!
 	services     []string

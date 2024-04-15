@@ -48,11 +48,6 @@ type Activity struct {
 	EndTime   time.Time
 }
 
-type ActivityRepository interface {
-	GetAllActivities() ([]Activity, error)
-	Add(activity Activity) error
-}
-
 type ProjectRepository interface {
 	GetAllCustomers() ([]Customer, error)
 	GetTimeEntries(start, end time.Time) ([]Activity, error)
