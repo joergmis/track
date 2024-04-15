@@ -33,7 +33,21 @@ var (
 			t := tabby.New()
 			t.AddHeader("time", "duration", "customer", "project", "description")
 
-			for _, entry := range activities {
+			for i, entry := range activities {
+				if i > 0 {
+					// check for pauses between entries
+					previous := activities[i-1]
+					if entry.StartTime.Sub(previous.EndTime) > time.Duration(1)*time.Minute {
+						t.AddLine(
+							fmt.Sprintf("%s - %s", previous.EndTime.Format(time.TimeOnly), entry.StartTime.Format(time.TimeOnly)),
+							fmt.Sprintf("%d min", int(entry.StartTime.Sub(previous.EndTime).Minutes())),
+							"-- pause --",
+							"--",
+							"--",
+						)
+					}
+				}
+
 				if entry.StartTime.Before(start) || entry.StartTime.After(end) || entry.EndTime.After(end) {
 					continue
 				}

@@ -120,7 +120,7 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 
 	found = false
 	for _, svc := range services {
-		if activity.Service == svc.Name {
+		if activity.Service == cleanup(svc.Name) {
 			service = svc
 			found = true
 		}
@@ -142,8 +142,8 @@ func (r *repository) AddTimeEntry(activity track.Activity) error {
 		Text:        activity.Description,
 		UsersId:     r.userID,
 		Billable:    api.PostV2EntriesParamsBillable(billable),
-		TimeSince:   activity.StartTime.Format(TimeLayoutString),
-		TimeUntil:   activity.EndTime.Format(TimeLayoutString),
+		TimeSince:   activity.StartTime.UTC().Format(TimeLayoutString),
+		TimeUntil:   activity.EndTime.UTC().Format(TimeLayoutString),
 	})
 	if err != nil {
 		log.Println(string(response.Body))

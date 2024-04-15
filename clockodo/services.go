@@ -16,7 +16,7 @@ func (r *repository) GetAllServices() ([]string, error) {
 	}
 
 	for _, service := range raw {
-		services = append(services, service.Name)
+		services = append(services, cleanup(service.Name))
 	}
 
 	return services, nil

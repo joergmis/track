@@ -17,7 +17,7 @@ var syncCmd = &cobra.Command{
 		}
 
 		for _, activity := range activities {
-			if !activity.Synced {
+			if !activity.Synced && !activity.InProgress {
 				if err := backend.AddTimeEntry(activity); err != nil {
 					log.Fatalf("sync activity: %v", err)
 				}
