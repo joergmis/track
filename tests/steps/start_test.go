@@ -61,7 +61,6 @@ func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, s
 	err = activityRepo.AddActivity(track.Activity{
 		ID:          uuid.New().String(),
 		Synced:      false,
-		InProgress:  true,
 		Customer:    customer,
 		Project:     project,
 		Service:     service,
@@ -86,16 +85,10 @@ func givenThereAreNoTimeEntriesPresent(ctx context.Context) (context.Context, er
 }
 
 func whenStartingANewActivityFor(ctx context.Context, customer, project, service, description string) (context.Context, error) {
-	err := activityRepo.AddActivity(track.Activity{
-		ID:          uuid.New().String(),
-		Synced:      false,
-		InProgress:  true,
-		Customer:    customer,
-		Project:     project,
-		Service:     service,
-		Description: description,
-		StartTime:   now,
-	})
+	activity := track.NewActivity(customer, project, service, description)
+	activity.StartTime = now
+
+	err := activityRepo.AddActivity(activity)
 	assert.Nil(testReference, err)
 
 	return ctx, nil

@@ -16,7 +16,7 @@ var stopCmd = &cobra.Command{
 			log.Fatalf("get last activity: %v", err)
 		}
 
-		if activity.InProgress {
+		if activity.InProgress() {
 			activity.Stop()
 			if err := storage.UpdateActivity(activity); err != nil {
 				log.Fatalf("stop activity: %v", err)

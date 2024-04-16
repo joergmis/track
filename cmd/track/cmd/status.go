@@ -21,7 +21,8 @@ var statusCmd = &cobra.Command{
 
 		inRange := []track.Activity{}
 
-		start := time.Now().Add(-24 * time.Hour)
+		// only show the current day
+		start := time.Now().Add(-1 * time.Duration(time.Now().Hour()) * time.Hour)
 		end := time.Now().Add(1 * time.Hour)
 
 		for _, entry := range activities {
@@ -49,7 +50,7 @@ var statusCmd = &cobra.Command{
 				if entry.StartTime.Sub(previous.EndTime).Minutes() > 5 {
 					t.AddLine(
 						fmt.Sprintf("%s - %s", previous.EndTime.Add(1*time.Second).Format(time.TimeOnly), entry.StartTime.Add(-1*time.Second).Format(time.TimeOnly)),
-						fmt.Sprintf("%02d:%02d h", int(entry.StartTime.Sub(previous.EndTime).Hours()), int(entry.StartTime.Sub(previous.EndTime).Minutes())%60),
+						fmt.Sprintf("%02d:%02d h", int(entry.Duration().Hours()), int(entry.Duration().Minutes())%60),
 						"-- pause --",
 						"--",
 						"--",
@@ -57,15 +58,19 @@ var statusCmd = &cobra.Command{
 				}
 			}
 
-			if entry.InProgress {
-				total += time.Since(entry.StartTime)
-			} else {
-				total += entry.EndTime.Sub(entry.StartTime)
-			}
+			total += entry.Duration()
 
 			t.AddLine(
-				fmt.Sprintf("%s - %s", entry.StartTime.Format(time.TimeOnly), entry.EndTime.Format(time.TimeOnly)),
-				getDuration(entry),
+				fmt.Sprintf(
+					"%s - %s",
+					entry.StartTime.Format(time.TimeOnly),
+					entry.EndTime.Format(time.TimeOnly),
+				),
+				fmt.Sprintf(
+					"%02d:%02d h",
+					int(entry.Duration().Hours()),
+					int(entry.Duration().Minutes())%60,
+				),
 				entry.Customer,
 				entry.Project,
 				entry.Description,
@@ -81,22 +86,6 @@ var statusCmd = &cobra.Command{
 		t.AddLine(fmt.Sprintf("%02d:%02d h", int(total.Hours()), int(total.Minutes())%60))
 		t.Print()
 	},
-}
-
-func getDuration(activity track.Activity) string {
-	if activity.InProgress {
-		return fmt.Sprintf(
-			"%02d:%02d h (in progress)",
-			int(time.Since(activity.StartTime).Hours()),
-			int(time.Since(activity.StartTime).Minutes())%60,
-		)
-	}
-
-	return fmt.Sprintf(
-		"%02d:%02d h",
-		int(activity.EndTime.Sub(activity.StartTime).Hours()),
-		int(activity.EndTime.Sub(activity.StartTime).Minutes())%60,
-	)
 }
 
 func init() {

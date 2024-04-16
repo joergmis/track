@@ -16,6 +16,9 @@ var generateCmd = &cobra.Command{
 the list has to be generated in advance before building the
 application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: this should probably be moved to a separate script and then
+		// could be packed into a go:generate command
+
 		customers, err := backend.GetAllCustomers()
 		cobra.CheckErr(err)
 

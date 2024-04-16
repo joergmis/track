@@ -6,19 +6,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type Clock interface {
-	Now() time.Time
-}
-
 func NewActivity(customer, project, service, description string) Activity {
 	return Activity{
 		ID:          uuid.New().String(),
 		Synced:      false,
-		InProgress:  true,
 		Customer:    customer,
 		Project:     project,
 		Service:     service,
 		Description: description,
+		EndTime:     time.Unix(0, 0),
 	}
 }
 
@@ -30,5 +26,17 @@ func (a *Activity) Stop() {
 	// in case the activity is stopped when a new one is started, this makes
 	// sure that they don't overlap
 	a.EndTime = time.Now().Add(-1 * time.Second)
-	a.InProgress = false
+}
+
+func (a *Activity) Duration() time.Duration {
+	// in case the activity is still in progress
+	if !a.EndTime.After(a.StartTime) {
+		return time.Since(a.StartTime)
+	}
+
+	return a.EndTime.Sub(a.StartTime)
+}
+
+func (a *Activity) InProgress() bool {
+	return !a.EndTime.After(a.StartTime)
 }

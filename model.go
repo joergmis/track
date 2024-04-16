@@ -14,8 +14,6 @@ var (
 	ErrNotInitialized    = errors.New("repository has not been initialized")
 )
 
-type Service []string
-
 type Customer struct {
 	ID       string
 	Name     string
@@ -36,8 +34,6 @@ type Activity struct {
 	// the ID...
 	// Synced keeps track if the activity has been synced.
 	Synced bool
-	// InProgress indicates that the activity is not yet finished.
-	InProgress bool
 
 	Customer    string
 	Project     string
