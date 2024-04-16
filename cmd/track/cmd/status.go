@@ -40,7 +40,29 @@ var statusCmd = &cobra.Command{
 		t := tabby.New()
 		t.AddHeader("time", "duration", "customer", "project", "description")
 
-		for _, entry := range inRange {
+		total := time.Duration(0)
+
+		for i, entry := range inRange {
+			if i > 0 {
+				// check for pauses between activities
+				previous := inRange[i-1]
+				if entry.StartTime.Sub(previous.EndTime).Minutes() > 5 {
+					t.AddLine(
+						fmt.Sprintf("%s - %s", previous.EndTime.Add(1*time.Second).Format(time.TimeOnly), entry.StartTime.Add(-1*time.Second).Format(time.TimeOnly)),
+						fmt.Sprintf("%02d:%02d h", int(entry.StartTime.Sub(previous.EndTime).Hours()), int(entry.StartTime.Sub(previous.EndTime).Minutes())%60),
+						"-- pause --",
+						"--",
+						"--",
+					)
+				}
+			}
+
+			if entry.InProgress {
+				total += time.Since(entry.StartTime)
+			} else {
+				total += entry.EndTime.Sub(entry.StartTime)
+			}
+
 			t.AddLine(
 				fmt.Sprintf("%s - %s", entry.StartTime.Format(time.TimeOnly), entry.EndTime.Format(time.TimeOnly)),
 				getDuration(entry),
@@ -51,17 +73,30 @@ var statusCmd = &cobra.Command{
 		}
 
 		t.Print()
+
+		fmt.Println("")
+
+		t = tabby.New()
+		t.AddHeader("total today")
+		t.AddLine(fmt.Sprintf("%02d:%02d h", int(total.Hours()), int(total.Minutes())%60))
+		t.Print()
 	},
 }
 
 func getDuration(activity track.Activity) string {
-	duration := int(activity.EndTime.Sub(activity.StartTime).Minutes())
-
-	if duration >= 0 {
-		return fmt.Sprintf("%d min", duration)
+	if activity.InProgress {
+		return fmt.Sprintf(
+			"%02d:%02d h (in progress)",
+			int(time.Since(activity.StartTime).Hours()),
+			int(time.Since(activity.StartTime).Minutes())%60,
+		)
 	}
 
-	return "in progress"
+	return fmt.Sprintf(
+		"%02d:%02d h",
+		int(activity.EndTime.Sub(activity.StartTime).Hours()),
+		int(activity.EndTime.Sub(activity.StartTime).Minutes())%60,
+	)
 }
 
 func init() {
