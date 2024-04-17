@@ -7,6 +7,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	ProjectBackendClockodo = "clockodo"
+)
+
 //go:generate go run scripts/main.go
 var (
 	ErrNoCurrentActivity = errors.New("no active activity")
@@ -15,6 +19,8 @@ var (
 	ErrServiceNotFound   = errors.New("service not found")
 	ErrNotInitialized    = errors.New("repository has not been initialized")
 )
+
+type ProjectBackendType string
 
 type Customer struct {
 	ID       string
@@ -80,6 +86,9 @@ func (a *Activity) InProgress() bool {
 }
 
 type ProjectRepository interface {
+	// Get the type of repository.
+	Type() ProjectBackendType
+
 	// GetAllCustomers returns a list with all customers.
 	GetAllCustomers() ([]Customer, error)
 

@@ -18,7 +18,7 @@ type storage struct {
 }
 
 type save struct {
-	Activities []track.Activity
+	Activities map[track.ProjectBackendType][]track.Activity
 }
 
 func NewStorage(path string) (track.ActivityRepository, error) {
@@ -59,18 +59,18 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 	return strg, nil
 }
 
-func (s *storage) GetActivities() ([]track.Activity, error) {
+func (s *storage) GetActivities() (map[track.ProjectBackendType][]track.Activity, error) {
 	data, err := s.getData()
 	return data.Activities, err
 }
 
-func (s *storage) AddActivity(activity track.Activity) error {
+func (s *storage) AddActivity(backend track.ProjectBackendType, activity track.Activity) error {
 	data, err := s.getData()
 	if err != nil {
 		return err
 	}
 
-	data.Activities = append(data.Activities, activity)
+	data.Activities[backend] = append(data.Activities[backend], activity)
 
 	return s.setData(data)
 }
@@ -103,7 +103,7 @@ func (s *storage) setData(savedata save) error {
 	return nil
 }
 
-func (s *storage) GetLastActivity() (track.Activity, error) {
+func (s *storage) GetLastActivity(backend track.ProjectBackendType) (track.Activity, error) {
 	activity := track.Activity{}
 
 	data, err := s.getData()
@@ -115,16 +115,16 @@ func (s *storage) GetLastActivity() (track.Activity, error) {
 		return activity, track.ErrNoActivities
 	}
 
-	sort.Slice(data.Activities, func(i, j int) bool {
-		return data.Activities[i].StartTime.Before(data.Activities[j].StartTime)
+	sort.Slice(data.Activities[backend], func(i, j int) bool {
+		return data.Activities[backend][i].StartTime.Before(data.Activities[backend][j].StartTime)
 	})
 
-	activity = data.Activities[len(data.Activities)-1]
+	activity = data.Activities[backend][len(data.Activities)-1]
 
 	return activity, nil
 }
 
-func (s *storage) UpdateActivity(activity track.Activity) error {
+func (s *storage) UpdateActivity(backend track.ProjectBackendType, activity track.Activity) error {
 	data, err := s.getData()
 	if err != nil {
 		return err
@@ -132,10 +132,10 @@ func (s *storage) UpdateActivity(activity track.Activity) error {
 
 	found := false
 
-	for i, act := range data.Activities {
+	for i, act := range data.Activities[backend] {
 		if act.ID == activity.ID {
 			found = true
-			data.Activities[i] = activity
+			data.Activities[backend][i] = activity
 		}
 	}
 
@@ -146,7 +146,7 @@ func (s *storage) UpdateActivity(activity track.Activity) error {
 	return s.setData(data)
 }
 
-func (s *storage) DeleteActivity(activity track.Activity) error {
+func (s *storage) DeleteActivity(backend track.ProjectBackendType, activity track.Activity) error {
 	data, err := s.getData()
 	if err != nil {
 		return err
@@ -155,7 +155,7 @@ func (s *storage) DeleteActivity(activity track.Activity) error {
 	index := 0
 	found := false
 
-	for i, act := range data.Activities {
+	for i, act := range data.Activities[backend] {
 		if act.ID == activity.ID {
 			index = i
 			found = true
@@ -166,7 +166,7 @@ func (s *storage) DeleteActivity(activity track.Activity) error {
 		return track.ErrNoMatchingActivity
 	}
 
-	data.Activities = append(data.Activities[:index], data.Activities[index+1:]...)
+	data.Activities[backend] = append(data.Activities[backend][:index], data.Activities[backend][index+1:]...)
 
 	return s.setData(data)
 }
