@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/joergmis/track"
@@ -12,6 +13,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TimeLayoutString is the layout that dates are expected to have when
+// submitted via API.
 const TimeLayoutString = "2006-01-02T15:04:05Z"
 
 type Config struct {
@@ -96,4 +99,19 @@ func newClockodoClient(config Config) (*api.ClientWithResponses, error) {
 		api.WithRequestEditorFn(apiKeyProvider.Intercept),
 		api.WithRequestEditorFn(clientIdentificationProvider),
 	)
+}
+
+// cleanup names in order for them being consistent and not having whitespaces
+// in the name since this creates (probably) some issues with the
+// autocompletion on the commandline..
+func cleanup(in string) string {
+	replacer := strings.NewReplacer(
+		" ", "_",
+		"ä", "ae",
+		"ö", "oe",
+		"ü", "ue",
+		"\"", "'",
+	)
+
+	return replacer.Replace(strings.ToLower(in))
 }

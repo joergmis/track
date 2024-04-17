@@ -2,7 +2,6 @@ package clockodo
 
 import (
 	"context"
-	"strings"
 
 	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo/api"
@@ -69,19 +68,4 @@ func (r *repository) getAllProjects(ctx context.Context) ([]api.Project, error) 
 	}
 
 	return response.JSON200.Projects, nil
-}
-
-// cleanup names in order for them being consistent and not having whitespaces
-// in the name since this creates (probably) some issues with the
-// autocompletion on the commandline..
-func cleanup(in string) string {
-	replacer := strings.NewReplacer(
-		" ", "_",
-		"ä", "ae",
-		"ö", "oe",
-		"ü", "ue",
-		"\"", "'",
-	)
-
-	return replacer.Replace(strings.ToLower(in))
 }

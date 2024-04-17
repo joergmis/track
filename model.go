@@ -3,9 +3,11 @@ package track
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
+//go:generate go run scripts/main.go
 var (
 	ErrNoCurrentActivity = errors.New("no active activity")
 	ErrCustomerNotFound  = errors.New("customer not found")
@@ -44,9 +46,50 @@ type Activity struct {
 	EndTime   time.Time
 }
 
+func NewActivity(customer, project, service, description string) Activity {
+	return Activity{
+		ID:          uuid.New().String(),
+		Synced:      false,
+		Customer:    customer,
+		Project:     project,
+		Service:     service,
+		Description: description,
+		EndTime:     time.Unix(0, 0),
+	}
+}
+
+func (a *Activity) Start() {
+	a.StartTime = time.Now()
+}
+
+func (a *Activity) Stop() {
+	// in case the activity is stopped when a new one is started, this makes
+	// sure that they don't overlap
+	a.EndTime = time.Now().Add(-1 * time.Second)
+}
+
+func (a *Activity) Duration() time.Duration {
+	// in case the activity is still in progress
+	if !a.EndTime.After(a.StartTime) {
+		return time.Since(a.StartTime)
+	}
+
+	return a.EndTime.Sub(a.StartTime)
+}
+
+func (a *Activity) InProgress() bool {
+	return !a.EndTime.After(a.StartTime)
+}
+
 type ProjectRepository interface {
+	// GetAllCustomers returns a list with all customers.
 	GetAllCustomers() ([]Customer, error)
-	GetTimeEntries(start, end time.Time) ([]Activity, error)
+
+	// GetAllServices returns a list including all services.
 	GetAllServices() ([]string, error)
+
+	// AddTimeEntry creates a new timeentry from the activity. It checks if
+	// there is matching data (like customer or project) and returns an error
+	// if this is not the case.
 	AddTimeEntry(activity Activity) error
 }

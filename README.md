@@ -18,21 +18,16 @@ Copy the configuration file and adjust the values.
 cp track.example.yaml ~/.config/track.yaml
 ```
 
-Generate the list of projects/clients/services which is required for the 
-autocompletion to work.
+Install the binary; if currently tries to retrieve customers, projects and 
+services from clockodo which means you have to create a config with valid 
+credentials (see above).
 
 ```bash
-go run cmd/track/main.go generate
-```
-
-Now you are ready to install the app:
-
-```bash
-go install ./cmd/track
+make install
 ```
 
 Check if app has been installed; if the app is not found, check if `~/go/bin` 
-is in $PATH.
+is in `$PATH`.
 
 ```bash
 track version
