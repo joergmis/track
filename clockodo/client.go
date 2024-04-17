@@ -27,6 +27,10 @@ type repository struct {
 	client *api.ClientWithResponses
 }
 
+func (r *repository) Type() track.ProjectBackendType {
+	return track.ProjectBackendClockodo
+}
+
 func NewRepository(config Config) (track.ProjectRepository, error) {
 	repo := &repository{}
 

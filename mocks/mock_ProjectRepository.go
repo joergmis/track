@@ -180,6 +180,51 @@ func (_c *MockProjectRepository_GetAllServices_Call) RunAndReturn(run func() ([]
 	return _c
 }
 
+// Type provides a mock function with given fields:
+func (_m *MockProjectRepository) Type() track.ProjectBackendType {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Type")
+	}
+
+	var r0 track.ProjectBackendType
+	if rf, ok := ret.Get(0).(func() track.ProjectBackendType); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(track.ProjectBackendType)
+	}
+
+	return r0
+}
+
+// MockProjectRepository_Type_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Type'
+type MockProjectRepository_Type_Call struct {
+	*mock.Call
+}
+
+// Type is a helper method to define mock.On call
+func (_e *MockProjectRepository_Expecter) Type() *MockProjectRepository_Type_Call {
+	return &MockProjectRepository_Type_Call{Call: _e.mock.On("Type")}
+}
+
+func (_c *MockProjectRepository_Type_Call) Run(run func()) *MockProjectRepository_Type_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockProjectRepository_Type_Call) Return(_a0 track.ProjectBackendType) *MockProjectRepository_Type_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockProjectRepository_Type_Call) RunAndReturn(run func() track.ProjectBackendType) *MockProjectRepository_Type_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockProjectRepository creates a new instance of MockProjectRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockProjectRepository(t interface {

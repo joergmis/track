@@ -20,17 +20,17 @@ func (_m *MockActivityRepository) EXPECT() *MockActivityRepository_Expecter {
 	return &MockActivityRepository_Expecter{mock: &_m.Mock}
 }
 
-// AddActivity provides a mock function with given fields: activity
-func (_m *MockActivityRepository) AddActivity(activity track.Activity) error {
-	ret := _m.Called(activity)
+// AddActivity provides a mock function with given fields: backend, activity
+func (_m *MockActivityRepository) AddActivity(backend track.ProjectBackendType, activity track.Activity) error {
+	ret := _m.Called(backend, activity)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddActivity")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
-		r0 = rf(activity)
+	if rf, ok := ret.Get(0).(func(track.ProjectBackendType, track.Activity) error); ok {
+		r0 = rf(backend, activity)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -44,14 +44,15 @@ type MockActivityRepository_AddActivity_Call struct {
 }
 
 // AddActivity is a helper method to define mock.On call
+//   - backend track.ProjectBackendType
 //   - activity track.Activity
-func (_e *MockActivityRepository_Expecter) AddActivity(activity interface{}) *MockActivityRepository_AddActivity_Call {
-	return &MockActivityRepository_AddActivity_Call{Call: _e.mock.On("AddActivity", activity)}
+func (_e *MockActivityRepository_Expecter) AddActivity(backend interface{}, activity interface{}) *MockActivityRepository_AddActivity_Call {
+	return &MockActivityRepository_AddActivity_Call{Call: _e.mock.On("AddActivity", backend, activity)}
 }
 
-func (_c *MockActivityRepository_AddActivity_Call) Run(run func(activity track.Activity)) *MockActivityRepository_AddActivity_Call {
+func (_c *MockActivityRepository_AddActivity_Call) Run(run func(backend track.ProjectBackendType, activity track.Activity)) *MockActivityRepository_AddActivity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(track.Activity))
+		run(args[0].(track.ProjectBackendType), args[1].(track.Activity))
 	})
 	return _c
 }
@@ -61,22 +62,22 @@ func (_c *MockActivityRepository_AddActivity_Call) Return(_a0 error) *MockActivi
 	return _c
 }
 
-func (_c *MockActivityRepository_AddActivity_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_AddActivity_Call {
+func (_c *MockActivityRepository_AddActivity_Call) RunAndReturn(run func(track.ProjectBackendType, track.Activity) error) *MockActivityRepository_AddActivity_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// DeleteActivity provides a mock function with given fields: activity
-func (_m *MockActivityRepository) DeleteActivity(activity track.Activity) error {
-	ret := _m.Called(activity)
+// DeleteActivity provides a mock function with given fields: backend, activity
+func (_m *MockActivityRepository) DeleteActivity(backend track.ProjectBackendType, activity track.Activity) error {
+	ret := _m.Called(backend, activity)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteActivity")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
-		r0 = rf(activity)
+	if rf, ok := ret.Get(0).(func(track.ProjectBackendType, track.Activity) error); ok {
+		r0 = rf(backend, activity)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -90,14 +91,15 @@ type MockActivityRepository_DeleteActivity_Call struct {
 }
 
 // DeleteActivity is a helper method to define mock.On call
+//   - backend track.ProjectBackendType
 //   - activity track.Activity
-func (_e *MockActivityRepository_Expecter) DeleteActivity(activity interface{}) *MockActivityRepository_DeleteActivity_Call {
-	return &MockActivityRepository_DeleteActivity_Call{Call: _e.mock.On("DeleteActivity", activity)}
+func (_e *MockActivityRepository_Expecter) DeleteActivity(backend interface{}, activity interface{}) *MockActivityRepository_DeleteActivity_Call {
+	return &MockActivityRepository_DeleteActivity_Call{Call: _e.mock.On("DeleteActivity", backend, activity)}
 }
 
-func (_c *MockActivityRepository_DeleteActivity_Call) Run(run func(activity track.Activity)) *MockActivityRepository_DeleteActivity_Call {
+func (_c *MockActivityRepository_DeleteActivity_Call) Run(run func(backend track.ProjectBackendType, activity track.Activity)) *MockActivityRepository_DeleteActivity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(track.Activity))
+		run(args[0].(track.ProjectBackendType), args[1].(track.Activity))
 	})
 	return _c
 }
@@ -107,29 +109,29 @@ func (_c *MockActivityRepository_DeleteActivity_Call) Return(_a0 error) *MockAct
 	return _c
 }
 
-func (_c *MockActivityRepository_DeleteActivity_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_DeleteActivity_Call {
+func (_c *MockActivityRepository_DeleteActivity_Call) RunAndReturn(run func(track.ProjectBackendType, track.Activity) error) *MockActivityRepository_DeleteActivity_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetActivities provides a mock function with given fields:
-func (_m *MockActivityRepository) GetActivities() ([]track.Activity, error) {
+func (_m *MockActivityRepository) GetActivities() (map[track.ProjectBackendType][]track.Activity, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetActivities")
 	}
 
-	var r0 []track.Activity
+	var r0 map[track.ProjectBackendType][]track.Activity
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]track.Activity, error)); ok {
+	if rf, ok := ret.Get(0).(func() (map[track.ProjectBackendType][]track.Activity, error)); ok {
 		return rf()
 	}
-	if rf, ok := ret.Get(0).(func() []track.Activity); ok {
+	if rf, ok := ret.Get(0).(func() map[track.ProjectBackendType][]track.Activity); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]track.Activity)
+			r0 = ret.Get(0).(map[track.ProjectBackendType][]track.Activity)
 		}
 	}
 
@@ -159,19 +161,19 @@ func (_c *MockActivityRepository_GetActivities_Call) Run(run func()) *MockActivi
 	return _c
 }
 
-func (_c *MockActivityRepository_GetActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetActivities_Call {
+func (_c *MockActivityRepository_GetActivities_Call) Return(_a0 map[track.ProjectBackendType][]track.Activity, _a1 error) *MockActivityRepository_GetActivities_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockActivityRepository_GetActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetActivities_Call {
+func (_c *MockActivityRepository_GetActivities_Call) RunAndReturn(run func() (map[track.ProjectBackendType][]track.Activity, error)) *MockActivityRepository_GetActivities_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetLastActivity provides a mock function with given fields:
-func (_m *MockActivityRepository) GetLastActivity() (track.Activity, error) {
-	ret := _m.Called()
+// GetLastActivity provides a mock function with given fields: backend
+func (_m *MockActivityRepository) GetLastActivity(backend track.ProjectBackendType) (track.Activity, error) {
+	ret := _m.Called(backend)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetLastActivity")
@@ -179,17 +181,17 @@ func (_m *MockActivityRepository) GetLastActivity() (track.Activity, error) {
 
 	var r0 track.Activity
 	var r1 error
-	if rf, ok := ret.Get(0).(func() (track.Activity, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(track.ProjectBackendType) (track.Activity, error)); ok {
+		return rf(backend)
 	}
-	if rf, ok := ret.Get(0).(func() track.Activity); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(track.ProjectBackendType) track.Activity); ok {
+		r0 = rf(backend)
 	} else {
 		r0 = ret.Get(0).(track.Activity)
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(track.ProjectBackendType) error); ok {
+		r1 = rf(backend)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -203,13 +205,14 @@ type MockActivityRepository_GetLastActivity_Call struct {
 }
 
 // GetLastActivity is a helper method to define mock.On call
-func (_e *MockActivityRepository_Expecter) GetLastActivity() *MockActivityRepository_GetLastActivity_Call {
-	return &MockActivityRepository_GetLastActivity_Call{Call: _e.mock.On("GetLastActivity")}
+//   - backend track.ProjectBackendType
+func (_e *MockActivityRepository_Expecter) GetLastActivity(backend interface{}) *MockActivityRepository_GetLastActivity_Call {
+	return &MockActivityRepository_GetLastActivity_Call{Call: _e.mock.On("GetLastActivity", backend)}
 }
 
-func (_c *MockActivityRepository_GetLastActivity_Call) Run(run func()) *MockActivityRepository_GetLastActivity_Call {
+func (_c *MockActivityRepository_GetLastActivity_Call) Run(run func(backend track.ProjectBackendType)) *MockActivityRepository_GetLastActivity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		run(args[0].(track.ProjectBackendType))
 	})
 	return _c
 }
@@ -219,22 +222,22 @@ func (_c *MockActivityRepository_GetLastActivity_Call) Return(_a0 track.Activity
 	return _c
 }
 
-func (_c *MockActivityRepository_GetLastActivity_Call) RunAndReturn(run func() (track.Activity, error)) *MockActivityRepository_GetLastActivity_Call {
+func (_c *MockActivityRepository_GetLastActivity_Call) RunAndReturn(run func(track.ProjectBackendType) (track.Activity, error)) *MockActivityRepository_GetLastActivity_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// UpdateActivity provides a mock function with given fields: activity
-func (_m *MockActivityRepository) UpdateActivity(activity track.Activity) error {
-	ret := _m.Called(activity)
+// UpdateActivity provides a mock function with given fields: backend, activity
+func (_m *MockActivityRepository) UpdateActivity(backend track.ProjectBackendType, activity track.Activity) error {
+	ret := _m.Called(backend, activity)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateActivity")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
-		r0 = rf(activity)
+	if rf, ok := ret.Get(0).(func(track.ProjectBackendType, track.Activity) error); ok {
+		r0 = rf(backend, activity)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -248,14 +251,15 @@ type MockActivityRepository_UpdateActivity_Call struct {
 }
 
 // UpdateActivity is a helper method to define mock.On call
+//   - backend track.ProjectBackendType
 //   - activity track.Activity
-func (_e *MockActivityRepository_Expecter) UpdateActivity(activity interface{}) *MockActivityRepository_UpdateActivity_Call {
-	return &MockActivityRepository_UpdateActivity_Call{Call: _e.mock.On("UpdateActivity", activity)}
+func (_e *MockActivityRepository_Expecter) UpdateActivity(backend interface{}, activity interface{}) *MockActivityRepository_UpdateActivity_Call {
+	return &MockActivityRepository_UpdateActivity_Call{Call: _e.mock.On("UpdateActivity", backend, activity)}
 }
 
-func (_c *MockActivityRepository_UpdateActivity_Call) Run(run func(activity track.Activity)) *MockActivityRepository_UpdateActivity_Call {
+func (_c *MockActivityRepository_UpdateActivity_Call) Run(run func(backend track.ProjectBackendType, activity track.Activity)) *MockActivityRepository_UpdateActivity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(track.Activity))
+		run(args[0].(track.ProjectBackendType), args[1].(track.Activity))
 	})
 	return _c
 }
@@ -265,7 +269,7 @@ func (_c *MockActivityRepository_UpdateActivity_Call) Return(_a0 error) *MockAct
 	return _c
 }
 
-func (_c *MockActivityRepository_UpdateActivity_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_UpdateActivity_Call {
+func (_c *MockActivityRepository_UpdateActivity_Call) RunAndReturn(run func(track.ProjectBackendType, track.Activity) error) *MockActivityRepository_UpdateActivity_Call {
 	_c.Call.Return(run)
 	return _c
 }

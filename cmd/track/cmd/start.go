@@ -25,14 +25,14 @@ autocompletion for your prefered shell.`,
 		service := args[2]
 		description := strings.Join(args[3:], " ")
 
-		previousActivity, err := storage.GetLastActivity()
+		previousActivity, err := storage.GetLastActivity(track.ProjectBackendType(selectedBackend))
 		if err != nil {
 			if errors.Cause(err) != track.ErrNoActivities {
 				log.Fatalf("get last activity: %v", err)
 			}
 		} else {
 			previousActivity.Stop()
-			if err := storage.UpdateActivity(previousActivity); err != nil {
+			if err := storage.UpdateActivity(track.ProjectBackendType(selectedBackend), previousActivity); err != nil {
 				log.Fatalf("stop the previous activity: %v", err)
 			}
 		}
@@ -40,7 +40,7 @@ autocompletion for your prefered shell.`,
 		newActivity := track.NewActivity(customer, project, service, description)
 		newActivity.Start()
 
-		if err := storage.AddActivity(newActivity); err != nil {
+		if err := storage.AddActivity(track.ProjectBackendType(selectedBackend), newActivity); err != nil {
 			log.Fatalf("start new activity: %v", err)
 		}
 

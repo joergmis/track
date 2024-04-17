@@ -26,13 +26,23 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 		location: path,
 	}
 
+	savedata := save{
+		Activities: map[track.ProjectBackendType][]track.Activity{},
+	}
+
 	data, err := os.ReadFile(filepath.Join(path, filename))
 	if err != nil {
 		if err := os.MkdirAll(path, 0755); err != nil {
 			return strg, errors.Wrap(err, "create directory")
 		}
 
-		if err := os.WriteFile(filepath.Join(path, filename), []byte("{}"), 0644); err != nil {
+		var buf bytes.Buffer
+
+		if err := json.NewEncoder(&buf).Encode(&savedata); err != nil {
+			return strg, errors.Wrap(err, "encode initial savedata")
+		}
+
+		if err := os.WriteFile(filepath.Join(path, filename), buf.Bytes(), 0644); err != nil {
 			return strg, errors.Wrap(err, "initialize database")
 		}
 
@@ -41,8 +51,6 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 			return strg, errors.Wrap(err, "read/open file")
 		}
 	}
-
-	savedata := save{}
 
 	if len(data) < 2 {
 		// this means most probably that there hasn't been any data previously
@@ -68,6 +76,10 @@ func (s *storage) AddActivity(backend track.ProjectBackendType, activity track.A
 	data, err := s.getData()
 	if err != nil {
 		return err
+	}
+
+	if _, ok := data.Activities[backend]; !ok {
+		data.Activities[backend] = []track.Activity{}
 	}
 
 	data.Activities[backend] = append(data.Activities[backend], activity)
@@ -111,7 +123,11 @@ func (s *storage) GetLastActivity(backend track.ProjectBackendType) (track.Activ
 		return activity, err
 	}
 
-	if len(data.Activities) == 0 {
+	if _, ok := data.Activities[backend]; !ok {
+		data.Activities[backend] = []track.Activity{}
+	}
+
+	if len(data.Activities) == 0 || len(data.Activities[backend]) == 0 {
 		return activity, track.ErrNoActivities
 	}
 

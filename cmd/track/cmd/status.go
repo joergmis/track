@@ -25,7 +25,7 @@ var statusCmd = &cobra.Command{
 		start := time.Now().Add(-1 * time.Duration(time.Now().Hour()) * time.Hour)
 		end := time.Now().Add(1 * time.Hour)
 
-		for _, entry := range activities {
+		for _, entry := range activities[track.ProjectBackendType(selectedBackend)] {
 			if entry.StartTime.Before(start) || entry.StartTime.After(end) || entry.EndTime.After(end) {
 				continue
 			}

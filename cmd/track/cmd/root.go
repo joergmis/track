@@ -13,8 +13,10 @@ import (
 )
 
 var (
-	backend track.ProjectRepository
-	storage track.ActivityRepository
+	selectedBackend string
+
+	backends = []track.ProjectRepository{}
+	storage  track.ActivityRepository
 
 	// only used for autocompletion!
 	services     []string
@@ -27,6 +29,8 @@ var (
 )
 
 func Execute() {
+	rootCmd.PersistentFlags().StringVarP(&selectedBackend, "backend", "b", string(backends[0].Type()), "Backend sets the what the activity should (eventually) be synced to")
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -58,13 +62,15 @@ func init() {
 		log.Fatal("no storage filepath set in configuration")
 	}
 
-	backend, err = clockodo.NewRepository(clockodo.Config{
+	backend, err := clockodo.NewRepository(clockodo.Config{
 		EmailAddress: viper.GetString("clockodo.email"),
 		ApiToken:     viper.GetString("clockodo.token"),
 	})
 	if err != nil {
 		log.Fatalf("setup clockodo repository: %v", err)
 	}
+
+	backends = append(backends, backend)
 
 	storage, err = local.NewStorage(filepath.Join(os.Getenv("HOME"), ".config", viper.GetString("storage.dir")))
 	if err != nil {

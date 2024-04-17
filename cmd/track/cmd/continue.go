@@ -11,7 +11,7 @@ var continueCmd = &cobra.Command{
 	Use:   "continue",
 	Short: "Continue the last activity",
 	Run: func(cmd *cobra.Command, args []string) {
-		previousActivity, err := storage.GetLastActivity()
+		previousActivity, err := storage.GetLastActivity(track.ProjectBackendType(selectedBackend))
 		if err != nil {
 			log.Fatalf("get last activity: %v", err)
 		}
@@ -20,7 +20,7 @@ var continueCmd = &cobra.Command{
 		newActivity := track.NewActivity(previousActivity.Customer, previousActivity.Project, previousActivity.Service, previousActivity.Description)
 		newActivity.Start()
 
-		if err := storage.AddActivity(newActivity); err != nil {
+		if err := storage.AddActivity(track.ProjectBackendType(selectedBackend), newActivity); err != nil {
 			log.Fatalf("continue (restart) activity: %v", err)
 		}
 	},
