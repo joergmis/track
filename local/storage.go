@@ -33,7 +33,7 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 			return strg, errors.Wrap(err, "create directory")
 		}
 
-		if err := os.WriteFile(filepath.Join(path, filename), []byte("{}"), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(path, filename), []byte("{\"Unsynced\":[],\"Synced\":[]}"), 0644); err != nil {
 			return strg, errors.Wrap(err, "initialize database")
 		}
 
@@ -43,7 +43,10 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 		}
 	}
 
-	savedata := savedata{}
+	savedata := savedata{
+		Synced:   []track.Activity{},
+		Unsynced: []track.Activity{},
+	}
 
 	if len(data) < 2 {
 		// this means most probably that there hasn't been any data previously
@@ -91,6 +94,14 @@ func (s *storage) getData() (savedata, error) {
 
 	if err := json.NewDecoder(bytes.NewBuffer(data)).Decode(&savedata); err != nil {
 		return savedata, errors.Wrap(err, "decode save data")
+	}
+
+	if savedata.Synced == nil {
+		savedata.Synced = []track.Activity{}
+	}
+
+	if savedata.Unsynced == nil {
+		savedata.Unsynced = []track.Activity{}
 	}
 
 	return savedata, nil
