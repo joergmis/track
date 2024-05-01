@@ -77,13 +77,9 @@ var statusCmd = &cobra.Command{
 			)
 		}
 
-		t.Print()
+		t.AddLine("---", "---")
+		t.AddLine("total", fmt.Sprintf("%02d:%02d h", int(total.Hours()), int(total.Minutes())%60))
 
-		fmt.Println("")
-
-		t = tabby.New()
-		t.AddHeader("total today")
-		t.AddLine(fmt.Sprintf("%02d:%02d h", int(total.Hours()), int(total.Minutes())%60))
 		t.Print()
 	},
 }
