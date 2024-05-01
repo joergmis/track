@@ -40,7 +40,7 @@ func init() {
 func main() {
 	viper.SetConfigName("track")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("$HOME/.config/")
+	viper.AddConfigPath("$HOME/.config/track")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
