@@ -14,7 +14,7 @@ var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Get an overview over the timetracking",
 	Run: func(cmd *cobra.Command, args []string) {
-		activities, err := storage.GetActivities()
+		activities, err := storage.GetAllActivities()
 		if err != nil {
 			log.Fatalf("get all activities from storage: %v", err)
 		}

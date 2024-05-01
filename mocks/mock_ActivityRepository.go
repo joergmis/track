@@ -112,12 +112,12 @@ func (_c *MockActivityRepository_DeleteActivity_Call) RunAndReturn(run func(trac
 	return _c
 }
 
-// GetActivities provides a mock function with given fields:
-func (_m *MockActivityRepository) GetActivities() ([]track.Activity, error) {
+// GetAllActivities provides a mock function with given fields:
+func (_m *MockActivityRepository) GetAllActivities() ([]track.Activity, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetActivities")
+		panic("no return value specified for GetAllActivities")
 	}
 
 	var r0 []track.Activity
@@ -142,29 +142,29 @@ func (_m *MockActivityRepository) GetActivities() ([]track.Activity, error) {
 	return r0, r1
 }
 
-// MockActivityRepository_GetActivities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetActivities'
-type MockActivityRepository_GetActivities_Call struct {
+// MockActivityRepository_GetAllActivities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllActivities'
+type MockActivityRepository_GetAllActivities_Call struct {
 	*mock.Call
 }
 
-// GetActivities is a helper method to define mock.On call
-func (_e *MockActivityRepository_Expecter) GetActivities() *MockActivityRepository_GetActivities_Call {
-	return &MockActivityRepository_GetActivities_Call{Call: _e.mock.On("GetActivities")}
+// GetAllActivities is a helper method to define mock.On call
+func (_e *MockActivityRepository_Expecter) GetAllActivities() *MockActivityRepository_GetAllActivities_Call {
+	return &MockActivityRepository_GetAllActivities_Call{Call: _e.mock.On("GetAllActivities")}
 }
 
-func (_c *MockActivityRepository_GetActivities_Call) Run(run func()) *MockActivityRepository_GetActivities_Call {
+func (_c *MockActivityRepository_GetAllActivities_Call) Run(run func()) *MockActivityRepository_GetAllActivities_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *MockActivityRepository_GetActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetActivities_Call {
+func (_c *MockActivityRepository_GetAllActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetAllActivities_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockActivityRepository_GetActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetActivities_Call {
+func (_c *MockActivityRepository_GetAllActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetAllActivities_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -220,6 +220,109 @@ func (_c *MockActivityRepository_GetLastActivity_Call) Return(_a0 track.Activity
 }
 
 func (_c *MockActivityRepository_GetLastActivity_Call) RunAndReturn(run func() (track.Activity, error)) *MockActivityRepository_GetLastActivity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUnsyncedActivities provides a mock function with given fields:
+func (_m *MockActivityRepository) GetUnsyncedActivities() ([]track.Activity, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUnsyncedActivities")
+	}
+
+	var r0 []track.Activity
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]track.Activity, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []track.Activity); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]track.Activity)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockActivityRepository_GetUnsyncedActivities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUnsyncedActivities'
+type MockActivityRepository_GetUnsyncedActivities_Call struct {
+	*mock.Call
+}
+
+// GetUnsyncedActivities is a helper method to define mock.On call
+func (_e *MockActivityRepository_Expecter) GetUnsyncedActivities() *MockActivityRepository_GetUnsyncedActivities_Call {
+	return &MockActivityRepository_GetUnsyncedActivities_Call{Call: _e.mock.On("GetUnsyncedActivities")}
+}
+
+func (_c *MockActivityRepository_GetUnsyncedActivities_Call) Run(run func()) *MockActivityRepository_GetUnsyncedActivities_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockActivityRepository_GetUnsyncedActivities_Call) Return(_a0 []track.Activity, _a1 error) *MockActivityRepository_GetUnsyncedActivities_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockActivityRepository_GetUnsyncedActivities_Call) RunAndReturn(run func() ([]track.Activity, error)) *MockActivityRepository_GetUnsyncedActivities_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MarkActivityAsSynced provides a mock function with given fields: activity
+func (_m *MockActivityRepository) MarkActivityAsSynced(activity track.Activity) error {
+	ret := _m.Called(activity)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MarkActivityAsSynced")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(track.Activity) error); ok {
+		r0 = rf(activity)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockActivityRepository_MarkActivityAsSynced_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MarkActivityAsSynced'
+type MockActivityRepository_MarkActivityAsSynced_Call struct {
+	*mock.Call
+}
+
+// MarkActivityAsSynced is a helper method to define mock.On call
+//   - activity track.Activity
+func (_e *MockActivityRepository_Expecter) MarkActivityAsSynced(activity interface{}) *MockActivityRepository_MarkActivityAsSynced_Call {
+	return &MockActivityRepository_MarkActivityAsSynced_Call{Call: _e.mock.On("MarkActivityAsSynced", activity)}
+}
+
+func (_c *MockActivityRepository_MarkActivityAsSynced_Call) Run(run func(activity track.Activity)) *MockActivityRepository_MarkActivityAsSynced_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(track.Activity))
+	})
+	return _c
+}
+
+func (_c *MockActivityRepository_MarkActivityAsSynced_Call) Return(_a0 error) *MockActivityRepository_MarkActivityAsSynced_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockActivityRepository_MarkActivityAsSynced_Call) RunAndReturn(run func(track.Activity) error) *MockActivityRepository_MarkActivityAsSynced_Call {
 	_c.Call.Return(run)
 	return _c
 }

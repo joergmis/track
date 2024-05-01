@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -43,8 +42,6 @@ autocompletion for your prefered shell.`,
 		if err := storage.AddActivity(newActivity); err != nil {
 			log.Fatalf("start new activity: %v", err)
 		}
-
-		fmt.Printf("started new activity: %v\n", newActivity)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		// used for the autocompletion feature - this only works if the data

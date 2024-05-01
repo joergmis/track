@@ -15,8 +15,8 @@ type ActivityRepository interface {
 	GetLastActivity() (Activity, error)
 
 	// GetActivities returns all stored activities, sorted according to the
-	// start time.
-	GetActivities() ([]Activity, error)
+	// start time but not differentiating between synced and not synced.
+	GetAllActivities() ([]Activity, error)
 
 	// AddActivity stores the activity.
 	AddActivity(activity Activity) error
@@ -25,6 +25,13 @@ type ActivityRepository interface {
 	// one. Returns [ErrNoMatchingActivity] if no activity matches the ID of
 	// the given activity.
 	UpdateActivity(activity Activity) error
+
+	// GetUnsyncedActivities returns a list of activities which haven't been
+	// synced yet.
+	GetUnsyncedActivities() ([]Activity, error)
+
+	// MarkActivityAsSynced marks an activity as not synced.
+	MarkActivityAsSynced(activity Activity) error
 
 	// DeleteActivity deletes a given activity from the storage. Returns
 	// [ErrNoMatchingActivity] if no activity matches the ID of the given

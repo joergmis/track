@@ -9,11 +9,10 @@ import (
 
 //go:generate go run scripts/main.go
 var (
-	ErrNoCurrentActivity = errors.New("no active activity")
-	ErrCustomerNotFound  = errors.New("customer not found")
-	ErrProjectNotFound   = errors.New("project not found")
-	ErrServiceNotFound   = errors.New("service not found")
-	ErrNotInitialized    = errors.New("repository has not been initialized")
+	ErrCustomerNotFound = errors.New("customer not found")
+	ErrProjectNotFound  = errors.New("project not found")
+	ErrServiceNotFound  = errors.New("service not found")
+	ErrNotInitialized   = errors.New("repository has not been initialized")
 )
 
 type Customer struct {
@@ -32,11 +31,6 @@ type Activity struct {
 	// supported backend.
 	ID string
 
-	// TODO: sync / in progress seem like implementation details? Maybe even
-	// the ID...
-	// Synced keeps track if the activity has been synced.
-	Synced bool
-
 	Customer    string
 	Project     string
 	Service     string
@@ -49,7 +43,6 @@ type Activity struct {
 func NewActivity(customer, project, service, description string) Activity {
 	return Activity{
 		ID:          uuid.New().String(),
-		Synced:      false,
 		Customer:    customer,
 		Project:     project,
 		Service:     service,

@@ -60,7 +60,6 @@ func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, s
 
 	err = activityRepo.AddActivity(track.Activity{
 		ID:          uuid.New().String(),
-		Synced:      false,
 		Customer:    customer,
 		Project:     project,
 		Service:     service,
@@ -73,7 +72,7 @@ func givenThereIsAnAcitivityRunningFor(ctx context.Context, customer, project, s
 }
 
 func givenThereAreNoTimeEntriesPresent(ctx context.Context) (context.Context, error) {
-	activities, err := activityRepo.GetActivities()
+	activities, err := activityRepo.GetAllActivities()
 	assert.Nil(testReference, err)
 
 	for _, activity := range activities {
@@ -111,7 +110,7 @@ func thenATimeentryIsAddedFor(ctx context.Context, date, customer, project, serv
 }
 
 func thenThereAreXEntries(ctx context.Context, count int) (context.Context, error) {
-	activities, err := activityRepo.GetActivities()
+	activities, err := activityRepo.GetAllActivities()
 	assert.Nil(testReference, err)
 
 	assert.Equal(testReference, count, len(activities))

@@ -11,20 +11,19 @@ var syncCmd = &cobra.Command{
 	Short: "Sync all changed/new activities to the configured backend",
 	Long:  `Note that this is (at least for now) a one-way process; local -> cloud`,
 	Run: func(cmd *cobra.Command, args []string) {
-		activities, err := storage.GetActivities()
+		activities, err := storage.GetUnsyncedActivities()
 		if err != nil {
-			log.Fatalf("get all activities: %v", err)
+			log.Fatalf("get all unsynced activities: %v", err)
 		}
 
 		for _, activity := range activities {
-			if !activity.Synced && !activity.InProgress() {
+			if !activity.InProgress() {
 				if err := backend.AddTimeEntry(activity); err != nil {
 					log.Fatalf("sync activity: %v", err)
 				}
 
-				activity.Synced = true
-				if err := storage.UpdateActivity(activity); err != nil {
-					log.Fatalf("mark activitiy as synced: %v", err)
+				if err := storage.MarkActivityAsSynced(activity); err != nil {
+					log.Fatalf("mark activity as synced: %v", err)
 				}
 			}
 		}

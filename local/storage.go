@@ -17,8 +17,9 @@ type storage struct {
 	location string
 }
 
-type save struct {
-	Activities []track.Activity
+type savedata struct {
+	Synced   []track.Activity
+	Unsynced []track.Activity
 }
 
 func NewStorage(path string) (track.ActivityRepository, error) {
@@ -42,7 +43,7 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 		}
 	}
 
-	savedata := save{}
+	savedata := savedata{}
 
 	if len(data) < 2 {
 		// this means most probably that there hasn't been any data previously
@@ -59,9 +60,15 @@ func NewStorage(path string) (track.ActivityRepository, error) {
 	return strg, nil
 }
 
-func (s *storage) GetActivities() ([]track.Activity, error) {
+func (s *storage) GetAllActivities() ([]track.Activity, error) {
 	data, err := s.getData()
-	return data.Activities, err
+
+	activities := []track.Activity{}
+
+	activities = append(activities, data.Synced...)
+	activities = append(activities, data.Unsynced...)
+
+	return activities, err
 }
 
 func (s *storage) AddActivity(activity track.Activity) error {
@@ -70,13 +77,13 @@ func (s *storage) AddActivity(activity track.Activity) error {
 		return err
 	}
 
-	data.Activities = append(data.Activities, activity)
+	data.Unsynced = append(data.Unsynced, activity)
 
 	return s.setData(data)
 }
 
-func (s *storage) getData() (save, error) {
-	savedata := save{}
+func (s *storage) getData() (savedata, error) {
+	savedata := savedata{}
 	data, err := os.ReadFile(filepath.Join(s.location, filename))
 	if err != nil {
 		return savedata, errors.Wrap(err, "read save data")
@@ -89,7 +96,7 @@ func (s *storage) getData() (save, error) {
 	return savedata, nil
 }
 
-func (s *storage) setData(savedata save) error {
+func (s *storage) setData(savedata savedata) error {
 	var buf bytes.Buffer
 
 	if err := json.NewEncoder(&buf).Encode(savedata); err != nil {
@@ -106,20 +113,20 @@ func (s *storage) setData(savedata save) error {
 func (s *storage) GetLastActivity() (track.Activity, error) {
 	activity := track.Activity{}
 
-	data, err := s.getData()
+	activities, err := s.GetAllActivities()
 	if err != nil {
-		return activity, err
+		return activity, errors.Wrap(err, "get all activities")
 	}
 
-	if len(data.Activities) == 0 {
+	sort.Slice(activities, func(i, j int) bool {
+		return activities[i].StartTime.Before(activities[j].StartTime)
+	})
+
+	if len(activities) == 0 {
 		return activity, track.ErrNoActivities
 	}
 
-	sort.Slice(data.Activities, func(i, j int) bool {
-		return data.Activities[i].StartTime.Before(data.Activities[j].StartTime)
-	})
-
-	activity = data.Activities[len(data.Activities)-1]
+	activity = activities[len(activities)-1]
 
 	return activity, nil
 }
@@ -132,15 +139,71 @@ func (s *storage) UpdateActivity(activity track.Activity) error {
 
 	found := false
 
-	for i, act := range data.Activities {
+	for i, act := range data.Unsynced {
 		if act.ID == activity.ID {
 			found = true
-			data.Activities[i] = activity
+			data.Unsynced[i] = activity
+		}
+	}
+
+	for i, act := range data.Synced {
+		if act.ID == activity.ID {
+			found = true
+			data.Synced[i] = activity
 		}
 	}
 
 	if !found {
 		return track.ErrNoMatchingActivity
+	}
+
+	return s.setData(data)
+}
+
+func (s *storage) GetUnsyncedActivities() ([]track.Activity, error) {
+	return []track.Activity{}, nil
+}
+
+func (s *storage) MarkActivityAsSynced(activity track.Activity) error {
+	data, err := s.getData()
+	if err != nil {
+		return err
+	}
+
+	{
+		// find the unsynced activity
+		index := 0
+		found := false
+
+		for i, act := range data.Unsynced {
+			if act.ID == activity.ID {
+				index = i
+				found = true
+			}
+		}
+
+		if !found {
+			return track.ErrNoMatchingActivity
+		}
+
+		data.Unsynced = append(data.Unsynced[:index], data.Unsynced[index+1:]...)
+	}
+
+	{
+		// add the activity to the synced list
+		found := false
+
+		for _, act := range data.Synced {
+			if act.ID == activity.ID {
+				found = true
+			}
+		}
+
+		if !found {
+			data.Synced = append(data.Synced, activity)
+		}
+
+		// TODO: throw an error or just silently fail?
 	}
 
 	return s.setData(data)
@@ -152,21 +215,39 @@ func (s *storage) DeleteActivity(activity track.Activity) error {
 		return err
 	}
 
-	index := 0
-	found := false
+	// TODO: fail if activity is found in neither list or silently fail?
 
-	for i, act := range data.Activities {
-		if act.ID == activity.ID {
-			index = i
-			found = true
+	{
+		index := 0
+		found := false
+
+		for i, act := range data.Synced {
+			if act.ID == activity.ID {
+				index = i
+				found = true
+			}
+		}
+
+		if found {
+			data.Synced = append(data.Synced[:index], data.Synced[index+1:]...)
 		}
 	}
 
-	if !found {
-		return track.ErrNoMatchingActivity
-	}
+	{
+		index := 0
+		found := false
 
-	data.Activities = append(data.Activities[:index], data.Activities[index+1:]...)
+		for i, act := range data.Unsynced {
+			if act.ID == activity.ID {
+				index = i
+				found = true
+			}
+		}
+
+		if found {
+			data.Unsynced = append(data.Unsynced[:index], data.Unsynced[index+1:]...)
+		}
+	}
 
 	return s.setData(data)
 }
