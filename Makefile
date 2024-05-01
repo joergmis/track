@@ -12,7 +12,7 @@ generate: clean
 	mockery
 
 test: generate
-	go test -v ./...
+	go test -coverpkg=./... ./...
 
 install: generate
 	go install ./cmd/track

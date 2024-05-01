@@ -161,7 +161,12 @@ func (s *storage) UpdateActivity(activity track.Activity) error {
 }
 
 func (s *storage) GetUnsyncedActivities() ([]track.Activity, error) {
-	return []track.Activity{}, nil
+	data, err := s.getData()
+	if err != nil {
+		return []track.Activity{}, err
+	}
+
+	return data.Unsynced, nil
 }
 
 func (s *storage) MarkActivityAsSynced(activity track.Activity) error {
