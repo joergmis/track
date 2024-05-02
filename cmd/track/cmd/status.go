@@ -45,12 +45,13 @@ var statusCmd = &cobra.Command{
 
 		for i, entry := range inRange {
 			if i > 0 {
-				// check for pauses between activities
 				previous := inRange[i-1]
+
 				if entry.StartTime.Sub(previous.EndTime).Minutes() > 5 {
+					pause := entry.EndTime.Sub(previous.StartTime)
 					t.AddLine(
 						fmt.Sprintf("%s - %s", previous.EndTime.Add(1*time.Second).Format(time.TimeOnly), entry.StartTime.Add(-1*time.Second).Format(time.TimeOnly)),
-						fmt.Sprintf("%02d:%02d h", int(entry.Duration().Hours()), int(entry.Duration().Minutes())%60),
+						fmt.Sprintf("%02d:%02d h", int(pause.Hours()), int(pause.Minutes())%60),
 						"-- pause --",
 						"--",
 						"--",
