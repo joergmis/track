@@ -15,7 +15,7 @@ services (starting with clockodo).
 Copy the configuration file and adjust the values.
 
 ```bash
-cp track.example.yaml ~/.config/track.yaml
+cp track.example.yaml ~/.config/track/track.yaml
 ```
 
 Install the binary; if currently tries to retrieve customers, projects and 
