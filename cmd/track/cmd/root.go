@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	backend track.ProjectRepository
-	storage track.ActivityRepository
+	backend track.Backend
+	storage track.Storage
 
 	// only used for autocompletion!
 	services     []string

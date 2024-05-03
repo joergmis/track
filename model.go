@@ -72,7 +72,7 @@ func (a *Activity) InProgress() bool {
 	return !a.EndTime.After(a.StartTime)
 }
 
-type ProjectRepository interface {
+type Backend interface {
 	// GetAllCustomers returns a list with all customers.
 	GetAllCustomers() ([]Customer, error)
 

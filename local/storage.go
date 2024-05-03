@@ -22,7 +22,7 @@ type savedata struct {
 	Unsynced []track.Activity
 }
 
-func NewStorage(path string) (track.ActivityRepository, error) {
+func NewStorage(path string) (track.Storage, error) {
 	strg := &storage{
 		location: path,
 	}

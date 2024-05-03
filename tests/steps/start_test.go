@@ -19,8 +19,8 @@ import (
 
 var (
 	testReference *testing.T
-	activityRepo  track.ActivityRepository
-	projectRepo   track.ProjectRepository
+	activityRepo  track.Storage
+	projectRepo   track.Backend
 	customers     []track.Customer
 	now           time.Time
 	testfile      string
@@ -49,7 +49,7 @@ func givenTheCustomerExists(ctx context.Context, customer, project string) (cont
 		},
 	})
 
-	projectRepo.(*mocks.MockProjectRepository).EXPECT().GetAllCustomers().Maybe().Return(customers, nil)
+	projectRepo.(*mocks.MockBackend).EXPECT().GetAllCustomers().Maybe().Return(customers, nil)
 
 	return ctx, nil
 }
@@ -123,7 +123,7 @@ func setup() {
 	storage, err := local.NewStorage(testfile)
 	assert.Nil(testReference, err)
 
-	projectRepo = mocks.NewMockProjectRepository(testReference)
+	projectRepo = mocks.NewMockBackend(testReference)
 	activityRepo = storage
 
 	customers = []track.Customer{}

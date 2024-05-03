@@ -27,7 +27,7 @@ type repository struct {
 	client *api.ClientWithResponses
 }
 
-func NewRepository(config Config) (track.ProjectRepository, error) {
+func NewRepository(config Config) (track.Backend, error) {
 	repo := &repository{}
 
 	client, err := newClockodoClient(config)
