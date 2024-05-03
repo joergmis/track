@@ -58,8 +58,8 @@ var (
 				if i > 0 {
 					previous := activities[i-1]
 
-					if entry.StartTime.Sub(previous.EndTime).Minutes() > 5 {
-						pause := entry.EndTime.Sub(previous.StartTime)
+					if previous.StartTime.Weekday() == entry.StartTime.Weekday() && entry.StartTime.Sub(previous.EndTime).Minutes() > 5 {
+						pause := entry.StartTime.Sub(previous.EndTime)
 						t.AddLine(
 							fmt.Sprintf("%s - %s", previous.EndTime.Add(1*time.Second).Format(time.TimeOnly), entry.StartTime.Add(-1*time.Second).Format(time.TimeOnly)),
 							fmt.Sprintf("%02d:%02d h", int(pause.Hours()), int(pause.Minutes())%60),
