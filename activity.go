@@ -50,6 +50,7 @@ func NewActivity(customer, project, service, description string, backend Backend
 		Project:     project,
 		Service:     service,
 		Description: description,
+		StartTime:   time.Unix(0, 0),
 		EndTime:     time.Unix(0, 0),
 	}
 }
@@ -72,5 +73,9 @@ func (a *Activity) Duration() time.Duration {
 }
 
 func (a *Activity) InProgress() bool {
+	if a.StartTime.Equal(a.EndTime) {
+		return false
+	}
+
 	return !a.EndTime.After(a.StartTime)
 }
