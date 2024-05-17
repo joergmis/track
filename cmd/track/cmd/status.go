@@ -46,7 +46,7 @@ var (
 			end = time.Now().Add(1 * time.Hour)
 
 			t := tabby.New()
-			t.AddHeader("time", "duration", "id", "customer", "project", "description")
+			t.AddHeader("time", "duration", "id", "backend", "customer", "project", "description")
 
 			total := time.Duration(0)
 
@@ -63,6 +63,7 @@ var (
 						t.AddLine(
 							fmt.Sprintf("%s - %s", previous.EndTime.Add(1*time.Second).Format(time.TimeOnly), entry.StartTime.Add(-1*time.Second).Format(time.TimeOnly)),
 							fmt.Sprintf("%02d:%02d h", int(pause.Hours()), int(pause.Minutes())%60),
+							"--",
 							"-- pause --",
 							"--",
 							"--",
@@ -84,6 +85,7 @@ var (
 						int(entry.Duration().Minutes())%60,
 					),
 					fmt.Sprintf("%d", i),
+					string(entry.Backend),
 					entry.Customer,
 					entry.Project,
 					entry.Description,

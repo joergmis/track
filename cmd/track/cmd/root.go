@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	backend track.Backend
-	storage track.Storage
+	backend        track.Backend
+	storage        track.Storage
+	defaultBackend track.BackendType
 
 	// only used for autocompletion!
 	services     []string
@@ -57,6 +58,12 @@ func init() {
 	if !viper.IsSet("storage.dir") {
 		log.Fatal("no storage filepath set in configuration")
 	}
+
+	if !viper.IsSet("backend.default") {
+		log.Fatal("no default backend set in configuration")
+	}
+
+	defaultBackend = track.BackendType(viper.GetString("backend.default"))
 
 	backend, err = clockodo.NewRepository(clockodo.Config{
 		EmailAddress: viper.GetString("clockodo.email"),

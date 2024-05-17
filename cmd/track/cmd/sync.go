@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	"github.com/joergmis/track"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,9 @@ var syncCmd = &cobra.Command{
 		}
 
 		for _, activity := range activities {
-			if !activity.InProgress() {
+			// only sync clockodo entries
+			// TODO: what about other backends?
+			if !activity.InProgress() && activity.Backend == track.BackendClockodo {
 				if err := backend.AddTimeEntry(activity); err != nil {
 					log.Fatalf("sync activity: %v", err)
 				}

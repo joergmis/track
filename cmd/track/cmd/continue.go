@@ -35,7 +35,7 @@ activity. Append the id to the command to continue a specific activity.
 				log.Fatalf("get last activity: %v", err)
 			}
 
-			newActivity = track.NewActivity(previousActivity.Customer, previousActivity.Project, previousActivity.Service, previousActivity.Description)
+			newActivity = track.NewActivity(previousActivity.Customer, previousActivity.Project, previousActivity.Service, previousActivity.Description, previousActivity.Backend)
 		} else if len(args) == 1 {
 			index, err := strconv.Atoi(args[0])
 			if err != nil {
@@ -53,7 +53,7 @@ activity. Append the id to the command to continue a specific activity.
 
 			previousActivity := activities[index]
 
-			newActivity = track.NewActivity(previousActivity.Customer, previousActivity.Project, previousActivity.Service, previousActivity.Description)
+			newActivity = track.NewActivity(previousActivity.Customer, previousActivity.Project, previousActivity.Service, previousActivity.Description, previousActivity.Backend)
 		} else {
 			log.Fatalf("unsupported number of arguments: %d", len(args))
 		}
