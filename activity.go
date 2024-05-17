@@ -31,6 +31,8 @@ type Activity struct {
 	// supported backend.
 	ID string
 
+	Backend BackendType
+
 	Customer    string
 	Project     string
 	Service     string
@@ -40,9 +42,10 @@ type Activity struct {
 	EndTime   time.Time
 }
 
-func NewActivity(customer, project, service, description string) Activity {
+func NewActivity(customer, project, service, description string, backend BackendType) Activity {
 	return Activity{
 		ID:          uuid.New().String(),
+		Backend:     backend,
 		Customer:    customer,
 		Project:     project,
 		Service:     service,
@@ -70,17 +73,4 @@ func (a *Activity) Duration() time.Duration {
 
 func (a *Activity) InProgress() bool {
 	return !a.EndTime.After(a.StartTime)
-}
-
-type Backend interface {
-	// GetAllCustomers returns a list with all customers.
-	GetAllCustomers() ([]Customer, error)
-
-	// GetAllServices returns a list including all services.
-	GetAllServices() ([]string, error)
-
-	// AddTimeEntry creates a new timeentry from the activity. It checks if
-	// there is matching data (like customer or project) and returns an error
-	// if this is not the case.
-	AddTimeEntry(activity Activity) error
 }

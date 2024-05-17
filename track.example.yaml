@@ -3,3 +3,5 @@ clockodo:
   token: your-api-token         # can be found in the clockodo settings
 storage:
   dir: track                    # folder will be appended to $HOME/.config/<your-dir>
+backend:
+  default: "clockodo"
