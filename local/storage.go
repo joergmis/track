@@ -18,11 +18,12 @@ type storage struct {
 }
 
 type savedata struct {
+	Version  track.Version
 	Synced   []track.Activity
 	Unsynced []track.Activity
 }
 
-func NewStorage(path string) (track.Storage, error) {
+func NewStorage(path string, version track.Version) (track.Storage, error) {
 	strg := &storage{
 		location: path,
 	}

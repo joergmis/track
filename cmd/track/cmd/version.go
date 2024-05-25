@@ -11,7 +11,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the build version of the app",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(track.Version)
+		fmt.Println(track.VersionString)
 	},
 }
 

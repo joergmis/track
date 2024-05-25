@@ -30,7 +30,7 @@ var (
 )
 
 func TestStorage_GetLastActivity_withActivities(t *testing.T) {
-	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"))
+	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"), track.Version{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func TestStorage_GetLastActivity_withActivities(t *testing.T) {
 }
 
 func TestStorage_GetLastActivity_withoutActivities(t *testing.T) {
-	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"))
+	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"), track.Version{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestStorage_GetLastActivity_withoutActivities(t *testing.T) {
 }
 
 func TestStorage_GetAllActivities(t *testing.T) {
-	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"))
+	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"), track.Version{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestStorage_GetAllActivities(t *testing.T) {
 }
 
 func TestStorage_GetUnsyncedActivities(t *testing.T) {
-	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"))
+	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"), track.Version{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func TestStorage_GetUnsyncedActivities(t *testing.T) {
 }
 
 func TestStorage_UpdateActivity(t *testing.T) {
-	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"))
+	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"), track.Version{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +119,7 @@ func TestStorage_UpdateActivity(t *testing.T) {
 }
 
 func TestStorage_DeleteActivity(t *testing.T) {
-	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"))
+	strg, err := local.NewStorage(filepath.Join(t.TempDir(), "entries.json"), track.Version{})
 	if err != nil {
 		t.Fatal(err)
 	}

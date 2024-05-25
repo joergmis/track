@@ -7,6 +7,12 @@ var (
 	ErrNoMatchingActivity = errors.New("no matching activity found")
 )
 
+type Version struct {
+	Major int
+	Minor int
+	Patch int
+}
+
 // Storage keeps a list of all activities locally available.
 type Storage interface {
 	// GetLastActivity checks the stored activities and returns the activity

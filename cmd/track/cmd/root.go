@@ -73,7 +73,10 @@ func init() {
 		log.Fatalf("setup clockodo repository: %v", err)
 	}
 
-	storage, err = local.NewStorage(filepath.Join(os.Getenv("HOME"), ".config", viper.GetString("storage.dir")))
+	storage, err = local.NewStorage(
+		filepath.Join(os.Getenv("HOME"), ".config", viper.GetString("storage.dir")),
+		track.Version{},
+	)
 	if err != nil {
 		log.Fatalf("setup storage repository: %v", err)
 	}
