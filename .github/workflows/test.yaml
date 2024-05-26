@@ -32,6 +32,10 @@ jobs:
         with:
           version: latest
 
+      - name: run mutation tests
+        continue-on-error: true
+        run: make mutation-tests
+
       - name: coverage report
         uses: gwatts/go-coverage-action@v2.0.0
         with:
