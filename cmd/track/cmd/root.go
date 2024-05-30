@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/joergmis/track"
-	"github.com/joergmis/track/clockodo"
 	"github.com/joergmis/track/local"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -64,13 +63,8 @@ func init() {
 	}
 
 	defaultBackend = track.BackendType(viper.GetString("backend.default"))
-
-	backend, err = clockodo.NewRepository(clockodo.Config{
-		EmailAddress: viper.GetString("clockodo.email"),
-		ApiToken:     viper.GetString("clockodo.token"),
-	})
-	if err != nil {
-		log.Fatalf("setup clockodo repository: %v", err)
+	if !defaultBackend.Valid() {
+		log.Fatalf("unknown backend type: %v\n", defaultBackend)
 	}
 
 	storage, err = local.NewStorage(
