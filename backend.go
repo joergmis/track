@@ -1,8 +1,14 @@
 package track
 
+import "github.com/pkg/errors"
+
 const (
 	BackendLocal    = BackendType("local")
 	BackendClockodo = BackendType("clockodo")
+)
+
+var (
+	ErrNoMatchingBackend = errors.New("no matching backend")
 )
 
 type BackendType string

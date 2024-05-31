@@ -65,7 +65,7 @@ func main() {
 		ApiToken:     viper.GetString("clockodo.token"),
 	})
 	if err != nil {
-		log.Fatalf("setup clockodo repository: %v", err)
+		log.Fatalf("scripts: setup clockodo repository: %v", err)
 	}
 
 	customers, err := backend.GetAllCustomers()

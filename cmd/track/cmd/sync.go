@@ -5,6 +5,7 @@ import (
 
 	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -14,6 +15,10 @@ var syncCmd = &cobra.Command{
 	Short: "Sync all changed/new activities to the configured backend",
 	Long:  `Note that this is (at least for now) a one-way process; local -> cloud`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if err := setupRepository(); err != nil {
+			log.Fatalf("setup backend: %v", err)
+		}
+
 		activities, err := storage.GetUnsyncedActivities()
 		if err != nil {
 			log.Fatalf("get all unsynced activities: %v", err)
@@ -36,30 +41,27 @@ var syncCmd = &cobra.Command{
 }
 
 func init() {
-	var err error
-
 	rootCmd.AddCommand(syncCmd)
+}
 
+func setupRepository() error {
 	defaultBackend = track.BackendType(viper.GetString("backend.default"))
 
 	switch defaultBackend {
 	case track.BackendLocal:
 		// nothing to do
-		break
 
 	case track.BackendClockodo:
+		var err error
 		backend, err = clockodo.NewRepository(clockodo.Config{
 			EmailAddress: viper.GetString("clockodo.email"),
 			ApiToken:     viper.GetString("clockodo.token"),
 		})
-		if err != nil {
-			log.Printf("setup clockodo repository: %v\n", err)
-		}
-		break
+		return errors.Wrap(err, "setup clockodo repository")
 
 	default:
-		log.Fatalf("backend %v does not match any known backend!\n", defaultBackend)
-		break
+		return errors.Wrapf(track.ErrNoMatchingBackend, "backend %v does not match any known backend!\n", defaultBackend)
 	}
 
+	return nil
 }
