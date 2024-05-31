@@ -3,6 +3,7 @@
 	install \
 	test \
 	mutation-testing \
+	lint \
 	clean
 
 generate: clean
@@ -10,7 +11,7 @@ generate: clean
 	go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@latest
 	oapi-codegen -package api ./clockodo/api/apispec.yaml > ./clockodo/api/clockodo.gen.go
 
-test:
+test: lint
 	go test -coverpkg=./... ./...
 
 mutation-tests:
@@ -20,3 +21,7 @@ mutation-tests:
 
 install: test generate
 	go install ./cmd/track
+
+lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0
+	golangci-lint run ./...
