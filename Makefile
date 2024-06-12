@@ -8,7 +8,7 @@
 
 generate: clean
 	go generate
-	go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 	oapi-codegen -package api ./clockodo/api/apispec.yaml > ./clockodo/api/clockodo.gen.go
 
 test: lint
@@ -20,6 +20,7 @@ mutation-tests:
 	go-mutesting github.com/joergmis/track/local
 
 install: test generate
+	go mod vendor # ensure we have all dependencies locally available
 	go install ./cmd/track
 
 lint:

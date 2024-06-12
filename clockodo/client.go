@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/joergmis/track"
 	"github.com/joergmis/track/clockodo/api"
+	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/pkg/errors"
 )
 
