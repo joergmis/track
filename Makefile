@@ -26,3 +26,7 @@ install: test generate
 lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0
 	golangci-lint run ./...
+
+swagger:
+	docker pull swaggerapi/swagger-editor
+	docker run -p 80:8080 -v ./:/tmp -e SWAGGER_FILE=/tmp/clockodo/api/apispec.yaml swaggerapi/swagger-editor
