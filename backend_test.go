@@ -12,13 +12,34 @@ func TestBackend_Valid(t *testing.T) {
 		name    string
 		backend string
 		valid   bool
-	}{}
+	}{
+		{
+			name:    "typo",
+			backend: "l0cal",
+			valid:   false,
+		},
+		{
+			name:    "non-existend",
+			backend: "some-backend",
+			valid:   false,
+		},
+		{
+			name:    "local",
+			backend: string(track.BackendLocal),
+			valid:   true,
+		},
+		{
+			name:    "clockodo",
+			backend: string(track.BackendClockodo),
+			valid:   true,
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			assert.Equal(
 				t,
-				track.BackendType(test.backend),
+				track.BackendType(test.backend).Valid(),
 				test.valid,
 			)
 		})
