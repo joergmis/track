@@ -32,6 +32,9 @@ jobs:
         with:
           version: latest
 
+      - name: run tests
+        run: make test
+
       - name: run mutation tests
         continue-on-error: true
         run: make mutation-tests

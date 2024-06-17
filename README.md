@@ -40,6 +40,11 @@ track completion bash > /tmp/completion
 source /tmp/completion
 ```
 
+## Playground for different tools and approaches
+
+- combinatory [approval testing](https://github.com/approvals/go-approval-tests)
+- [mutation testing](https://github.com/avito-tech/go-mutesting)
+
 ## References
 
 Loosely inspired by:
