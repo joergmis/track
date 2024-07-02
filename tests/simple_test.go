@@ -1,9 +1,8 @@
 package tests
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	approvals "github.com/approvals/go-approval-tests"
@@ -11,15 +10,12 @@ import (
 )
 
 func activityAsString(activity track.Activity) string {
-	var buf bytes.Buffer
-
-	activity.ID = "0"
-
-	if err := json.NewEncoder(&buf).Encode(activity); err != nil {
-		panic(err)
-	}
-
-	return buf.String()
+	return fmt.Sprintf("%s\n", strings.Join([]string{
+		activity.Customer,
+		activity.Project,
+		activity.Service,
+		activity.Description,
+	}, ", "))
 }
 
 func Test_Simple(t *testing.T) {
@@ -58,6 +54,7 @@ func Test_Simple(t *testing.T) {
 							act := track.NewActivity(customer, project, service, description, backend)
 							approvals.VerifyString(t, activityAsString(act))
 						})
+						i++
 					}
 				}
 			}

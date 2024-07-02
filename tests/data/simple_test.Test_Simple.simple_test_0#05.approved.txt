@@ -1,1 +1,0 @@
-{"ID":"0","Backend":"clockodo","Customer":"roger","Project":"assemble the table","Service":"mix the paint","Description":"get it at the store","StartTime":"1970-01-01T01:00:00+01:00","EndTime":"1970-01-01T01:00:00+01:00"}
