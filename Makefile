@@ -4,6 +4,7 @@
 	test \
 	mutation-testing \
 	lint \
+	completion \
 	clean
 
 generate: clean
@@ -20,7 +21,6 @@ mutation-tests:
 	go-mutesting github.com/joergmis/track/local
 
 install: test generate
-	go mod vendor # ensure we have all dependencies locally available
 	go install ./cmd/track
 
 lint:
@@ -30,3 +30,6 @@ lint:
 swagger:
 	docker pull swaggerapi/swagger-editor
 	docker run -p 80:8080 -v ./:/tmp -e SWAGGER_FILE=/tmp/clockodo/api/apispec.yaml swaggerapi/swagger-editor
+
+completion:
+	track completion bash > /etc/bash_completion.d/track
