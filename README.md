@@ -12,13 +12,17 @@ services (starting with clockodo).
 
 ## Setup and installation
 
-Copy the configuration file and adjust the values.
+Install the dependencies:
+
+- `sqlite3`
+
+Then, copy the configuration file and adjust the values accordingly.
 
 ```bash
 cp track.example.yaml ~/.config/track/track.yaml
 ```
 
-Install the binary; if currently tries to retrieve customers, projects and 
+Install the binary; it currently tries to retrieve customers, projects and 
 services from clockodo which means you have to create a config with valid 
 credentials (see above).
 
@@ -36,8 +40,8 @@ track version
 To make it easier to use, set up autocompletion:
 
 ```bash
-track completion bash > /tmp/completion
-source /tmp/completion
+touch /etc/bash_completion.d/track
+make completion
 ```
 
 ## Playground for different tools and approaches
