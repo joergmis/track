@@ -44,10 +44,25 @@ touch /etc/bash_completion.d/track
 make completion
 ```
 
+## CI
+
+Thanks to [dagger](https://dagger.io), you can run every github actions 
+workflow locally.
+
+```sh
+# run the tests
+dagger call test --source=.
+
+# generate the architecture
+dagger call generate-architecture --source=. export --path=./architecture.pdf
+```
+
 ## Playground for different tools and approaches
 
 - combinatory [approval testing](https://github.com/approvals/go-approval-tests)
 - [mutation testing](https://github.com/avito-tech/go-mutesting)
+- [arc42 documentation](https://arc42.org/)
+- [dagger](https://dagger.io)
 
 ## References
 
