@@ -4,3 +4,4 @@ VERSION.txt
 /track
 cmd/track/cmd/data.go
 vendor/
+*.pdf
