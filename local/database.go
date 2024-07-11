@@ -11,7 +11,7 @@ import (
 
 const (
 	databaseName = "track.db"
-	dateFormat   = time.RFC822
+	dateFormat   = time.RFC3339
 )
 
 type databaseStore struct {
@@ -40,13 +40,45 @@ func NewDatabaseStorage(path string, version track.Version) (track.Storage, erro
 }
 
 func (d *databaseStore) GetLastActivity() (track.Activity, error) {
-	return track.Activity{}, nil
+	activity := track.Activity{}
+
+	rows, err := d.database.Query("select * from activities order by startTime desc limit 1")
+	if err != nil {
+		return activity, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var backend, start, end string
+		if err := rows.Scan(&activity.ID, &backend, &activity.Customer, &activity.Project, &activity.Service, &activity.Description, &start, &end); err != nil {
+			return activity, err
+		}
+
+		activity.Backend = track.BackendType(backend)
+
+		activity.StartTime, err = time.Parse(dateFormat, start)
+		if err != nil {
+			return activity, err
+		}
+
+		activity.EndTime, err = time.Parse(dateFormat, end)
+		if err != nil {
+			return activity, err
+		}
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return activity, err
+	}
+
+	return activity, nil
 }
 
 func (d *databaseStore) GetAllActivities() ([]track.Activity, error) {
 	activities := []track.Activity{}
 
-	rows, err := d.database.Query("select id, backend, customer, project, service, description, startTime, endTime from activities")
+	rows, err := d.database.Query("select * from activities")
 	if err != nil {
 		return activities, err
 	}
@@ -121,19 +153,17 @@ func (d *databaseStore) UpdateActivity(activity track.Activity) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(`
-	update activities
+	stmt, err := tx.Prepare(`update activities
 	set
-		backend = ?,
-		customer = ?,
-		project = ?,
-		service = ?,
-		description = ?,
-		startTime = ?,
-		endTime = ?
+		backend=?,
+		customer=?,
+		project=?,
+		service=?,
+		description=?,
+		startTime=?,
+		endTime=?
 	where
-		id = ?;
-	`)
+		id=?`)
 	if err != nil {
 		return err
 	}
