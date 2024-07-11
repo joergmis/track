@@ -67,7 +67,7 @@ func init() {
 		log.Fatalf("unknown backend type: %v\n", defaultBackend)
 	}
 
-	storage, err = local.NewStorage(
+	storage, err = local.NewDatabaseStorage(
 		filepath.Join(os.Getenv("HOME"), ".config", viper.GetString("storage.dir")),
 		track.Version{},
 	)
