@@ -1,0 +1,31 @@
+name: dagger
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: generate documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 10
+
+      - name: generate architecture documentation
+        uses: dagger/dagger-for-github@v5
+        with:
+          version: "latest"
+          verb: call
+          args: generate-architecture --source=. export --path=./architecture.pdf
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: |
+            ./architecture.pdf
+          retention-days: 7

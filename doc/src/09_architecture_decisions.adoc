@@ -1,0 +1,23 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+[[section-design-decisions]]
+== Architecture Decisions
+
+=== ADR1: skipping ID for events
+
+==== Context
+
+For the event sourcing, events need to be generated. To be able to tell them
+apart, some sort of unique identification is needed.
+
+==== Decision
+
+Use the timestamp of when the event is generated as identifier. Since the
+application is focused on a single user, this is sufficient. If activities are
+syncronised to backends, they will their own identifier.
+
+==== Consequences
+
+If the application is used by multiple users, by chance, you might time it
+exactly so that two activities have the same timestamp and therefore are not
+uniquely identifiable.

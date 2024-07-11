@@ -1,4 +1,4 @@
-name: Build binaries
+name: run tests
 
 on:
   pull_request:
@@ -16,33 +16,9 @@ jobs:
           fetch-tags: true
           fetch-depth: 10
 
-      - name: go setup
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21.3'
-
-      - name: dependencies
-        run: go get .
-
-      - name: generate files
-        run: printf %s $(git describe --tags --dirty) > VERSION.txt
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-
       - name: run tests
-        run: make test
-
-      - name: run mutation tests
-        continue-on-error: true
-        run: make mutation-tests
-
-      - name: coverage report
-        uses: gwatts/go-coverage-action@v2.0.0
+        uses: dagger/dagger-for-github@v5
         with:
-          cover-pkg: ./...
-          ignore-pattern: |
-            \.gen\.go$
-            mocks
+          version: "latest"
+          verb: call
+          args: test --source=.

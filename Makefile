@@ -17,8 +17,8 @@ test: lint
 
 mutation-tests:
 	go install github.com/avito-tech/go-mutesting/cmd/go-mutesting@latest
-	go-mutesting github.com/joergmis/track
-	go-mutesting github.com/joergmis/track/local
+	go-mutesting github.com/joergmis/track || true
+	go-mutesting github.com/joergmis/track/local || true
 
 install: test generate
 	go install ./cmd/track
